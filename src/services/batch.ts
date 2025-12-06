@@ -1,12 +1,20 @@
 // src/services/batch.ts
 
 import {API_BASE_URL} from "../config/api"; // 确保 API_BASE_URL 导入路径正确
+
+// -------------------------------------------------------------------------
+// 💡 类型定义
+// -------------------------------------------------------------------------
+
+// 🎯 统一类型别名
+export type BatchType = 1 | 2 | 3 | 4;
+
 // 对应数据库表的行数据结构
 export interface BatchItem {
     id: number;
     makeshop_identifier: string;
     kakaku_product_id: string;
-    batch_type: 1 | 2 | 3 | 4 ;
+    batch_type: BatchType; // 👈 统一使用 1 | 2 | 3 | 4
     is_enabled: boolean;
     min_price_threshold: number | null;
 }
@@ -17,19 +25,31 @@ export interface BatchQuery {
     kakaku_product_id?: string;
 }
 
-// 创建批次项目所需的数据类型（与 BatchItem 类似，但不包含 id）
+// 创建批次项目所需的数据结构（与 BatchItem 类似，但不包含 id）
 export interface BatchCreateData {
     makeshop_identifier: string;
     kakaku_product_id: string;
-    batch_type: 1 | 2;
+    batch_type: BatchType; // 👈 统一使用 1 | 2 | 3 | 4
     is_enabled: boolean;
     min_price_threshold: number | null;
 }
 
+// -------------------------------------------------------------------------
+// 💡 API URL
+// -------------------------------------------------------------------------
+
+// 基础 API URL (用于删除)
+const BASE_API_URL = `${API_BASE_URL}/batch`;
+
+// 新增 API URL
 const CREATE_API_URL = `${API_BASE_URL}/batch/create`;
 
-// 基础 API URL
-const BATCH_API_URL = `${API_BASE_URL}/batch/getList`;
+// 列表 API URL
+const BATCH_LIST_API_URL = `${API_BASE_URL}/batch/getList`;
+
+// -------------------------------------------------------------------------
+// 💡 辅助函数
+// -------------------------------------------------------------------------
 
 /**
  * 从 localStorage 获取认证 Token
@@ -40,7 +60,13 @@ const getAuthToken = (): string | null => {
     return localStorage.getItem('authToken');
 };
 
+// -------------------------------------------------------------------------
+// 💡 API 函数
+// -------------------------------------------------------------------------
 
+/**
+ * 封装的新增批次项目 API 调用
+ */
 export const createBatchItemApi = async (data: BatchCreateData): Promise<BatchItem> => {
 
     const token = getAuthToken();
@@ -97,11 +123,8 @@ export const createBatchItemApi = async (data: BatchCreateData): Promise<BatchIt
 };
 
 
-
 /**
  * 封装的批次列表数据获取 API 调用
- * @param query 检索参数，例如 makeshop_identifier, kakaku_product_id
- * @returns 批次项目列表
  */
 export const fetchBatchListApi = async (query: BatchQuery): Promise<BatchItem[]> => {
 
@@ -120,7 +143,7 @@ export const fetchBatchListApi = async (query: BatchQuery): Promise<BatchItem[]>
         params.append('kakaku_product_id', query.kakaku_product_id);
     }
 
-    const url = `${BATCH_API_URL}?${params.toString()}`;
+    const url = `${BATCH_LIST_API_URL}?${params.toString()}`;
 
     try {
         // 3. 发送请求，包含 Authorization Header
@@ -171,6 +194,69 @@ export const fetchBatchListApi = async (query: BatchQuery): Promise<BatchItem[]>
 
     } catch (error) {
         console.error('BatchList API Error:', error);
+        throw error;
+    }
+};
+
+
+/**
+ * 封装的删除批次项目 API 调用
+ * @param id 要删除的批次项目 ID
+ */
+export const deleteBatchItemApi = async (id: number): Promise<void> => {
+
+    const token = getAuthToken();
+    if (!token) {
+        throw new Error('認証トークンが見つかりません。再ログインしてください。');
+    }
+
+    const url = `${BASE_API_URL}/${id}`; // 构造带 ID 的删除 URL
+
+    try {
+        const response = await fetch(url, {
+            method: 'DELETE', // 使用 DELETE 方法
+            headers: {
+                'Authorization': `Bearer ${token}`, // Bearer Token 认证
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const defaultErrorMessage = `ID: ${id} の削除に失敗しました`;
+
+        if (!response.ok) {
+
+            // 特殊处理 401 认证失败
+            if (response.status === 401) {
+                throw new Error('認証失敗またはトークン期限切れです。再ログインしてください。');
+            }
+
+            // 处理其他 HTTP 错误
+            let errorMessage = defaultErrorMessage;
+            const clonedResponse = response.clone();
+
+            try {
+                const errorData = await clonedResponse.json();
+                if (errorData.detail) {
+                    errorMessage = errorData.detail;
+                } else if (errorData.message) {
+                    errorMessage = errorData.message;
+                } else {
+                    errorMessage = defaultErrorMessage;
+                }
+            } catch (e) {
+                if (response.status >= 400 && response.status < 600) {
+                    errorMessage = `${defaultErrorMessage} (HTTP Status: ${response.status})`;
+                } else {
+                    errorMessage = `HTTP エラー: ${response.status} ${response.statusText}`;
+                }
+            }
+
+            throw new Error(errorMessage);
+        }
+
+        // 成功删除，不返回内容
+    } catch (error) {
+        console.error('Delete Batch Item API Error:', error);
         throw error;
     }
 };

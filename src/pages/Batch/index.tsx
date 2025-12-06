@@ -4,26 +4,19 @@ import React, { useState, useEffect } from 'react';
 import { Table, Form, Input, Button, Space, Tag, Popconfirm, message } from 'antd';
 import type { TableProps } from 'antd';
 
-// 🎯 从 service 文件导入 API 函数和类型，不再需要导入 './types'
-import { fetchBatchListApi, BatchItem, BatchQuery } from '../../services/batch';
+// 🎯 API 関数と型を service ファイルからインポート
+import { fetchBatchListApi, deleteBatchItemApi, BatchItem, BatchQuery } from '../../services/batch';
 import { useNavigate } from 'react-router-dom';
 
 import styles from './style.module.css';
 
 
 // -------------------------------------------------------------------------
-// 💡 MOCK 数据和 API (已移除，替换为实际 API 调用)
-// -------------------------------------------------------------------------
-// 🚨 MOCK 数据和 API 逻辑已移除，请确保您的 services/batch.ts 文件已就绪。
-// -------------------------------------------------------------------------
-
-
-// -------------------------------------------------------------------------
-// 💡 组件主体
+// 💡 コンポーネント本体
 // -------------------------------------------------------------------------
 
 const BatchList: React.FC = () => {
-    // 状态定义
+    // 状態定義
     const [data, setData] = useState<BatchItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm<BatchQuery>();
@@ -32,63 +25,73 @@ const BatchList: React.FC = () => {
 
 
     /**
-     * 异步加载数据函数，调用封装的 API
-     * @param values 检索表单的值
+     * データを非同期でロードする関数（API呼び出し）
+     * @param values 検索フォームの値
      */
     const loadData = async (values: BatchQuery) => {
         setLoading(true);
         try {
-            // 🎯 调用封装好的 API 函数
             const list = await fetchBatchListApi(values);
             setData(list);
         } catch (error) {
             console.error(error);
-            // 显示 API 封装中返回的日文错误信息
+            // API 封装で返される日本語のエラーメッセージを表示
             message.error(error instanceof Error ? error.message : 'データ取得中に不明なエラーが発生しました。');
 
-            // 如果是认证错误，可以在这里处理重定向
+            // 認証エラーの場合の処理（例：ログインページへリダイレクト）
             if (error instanceof Error && error.message.includes('認証')) {
-                // 示例: 可以在此添加跳转到登录页面的逻辑
-                // console.log("Redirecting to login...");
+                // ここにリダイレクト処理を追加できます
             }
 
-            setData([]); // 发生错误时清空数据
+            setData([]); // エラー発生時はデータをクリア
         } finally {
             setLoading(false);
         }
     };
 
-    // 页面初次加载时执行一次查询
+    // ページ初回のロード時に一度検索を実行
     useEffect(() => {
-        // 初始加载时不带参数，使用 API 中的默认 batch_type=1
         loadData({});
     }, []);
 
-    // 检索表单提交
+    // 検索フォーム送信
     const onFinish = (values: BatchQuery) => {
         loadData(values);
     };
 
-    // 操作：模拟删除 (实际项目中应调用删除 API)
-    const handleDelete = (id: number) => {
-        // 实际操作是调用删除 API
-        message.success(`ID: ${id} の設定を削除しました。`);
-        // 重新加载数据
-        loadData(form.getFieldsValue());
+    /**
+     * 💡 操作：実際の削除ロジック（API呼び出し）
+     * @param id 削除対象のレコード ID
+     */
+    const handleDelete = async (id: number) => {
+        try {
+            message.loading({ content: '削除処理中...', key: 'delete' });
+
+            // 🎯 deleteBatchItemApi を呼び出す
+            await deleteBatchItemApi(id);
+
+            message.success({ content: `ID: ${id} の設定を削除しました。`, key: 'delete', duration: 3 });
+
+            // 削除後、現在の検索条件でデータを再ロード
+            loadData(form.getFieldsValue());
+        } catch (error) {
+            console.error('Delete Error:', error);
+            // API 封装で返されるエラーメッセージを表示
+            message.error({ content: error instanceof Error ? error.message : '削除中に不明なエラーが発生しました。', key: 'delete', duration: 5 });
+        }
     };
 
-    // 批次类型文本映射
+    // 批次タイプを日本語テキストに変換
     const getBatchTypeText = (type: BatchItem['batch_type']) => {
-        // 🎯 更新后的日文映射
         switch (type) {
             case 1:
-                return '最安値'; // 第一位价格/最低价格
+                return '最安値';
             case 2:
-                return '1位と同じ価格'; // 第二位价格
+                return '1位と同じ価格';
             case 3:
-                return '2位価格'; // 第三位价格
+                return '2位価格';
             case 4:
-                return '3位価格'; // 价格更新 (假设您需要保留一个价格更新的类别)
+                return '3位価格';
             default:
                 return '不明';
         }
@@ -153,7 +156,7 @@ const BatchList: React.FC = () => {
                     <Popconfirm
                         title="削除しますか？"
                         description="この設定は元に戻せません。"
-                        onConfirm={() => handleDelete(record.id)}
+                        onConfirm={() => handleDelete(record.id)} // 🎯 実際の削除関数を呼び出し
                         okText="はい"
                         cancelText="いいえ"
                     >
@@ -179,7 +182,7 @@ const BatchList: React.FC = () => {
                     form={form}
                     name="batch_search"
                     layout="inline"
-                    onFinish={onFinish} // 👈 确保 onFinish 被使用
+                    onFinish={onFinish} // 👈 確保 onFinish が使用されている
                     className={styles['tech-search-form']}
                 >
                     <Form.Item
@@ -197,20 +200,20 @@ const BatchList: React.FC = () => {
                     </Form.Item>
 
                     <Form.Item>
-                        {/* 搜索按钮 */}
+                        {/* 検索ボタン */}
                         <Button className={`${styles['tech-button-small']} ${styles['tech-cursor-action']}`} type="primary" htmlType="submit">
                             検索
                         </Button>
                     </Form.Item>
                     <Form.Item>
-                        {/* 重置按钮 */}
+                        {/* リセットボタン */}
                         <Button className={`${styles['tech-button-small-secondary']} ${styles['tech-cursor-action']}`} onClick={() => form.resetFields()}>
                             リセット
                         </Button>
                     </Form.Item>
                 </Form>
 
-                {/* 工具栏（新增按钮） */}
+                {/* ツールバー（新規作成ボタン） */}
                 <div className={styles['tech-toolbar']}>
                     <Button className={`${styles['tech-button']} ${styles['tech-cursor-action']}`} type="primary" onClick={() => navigate('/batchCreate')}>
                         新規作成
@@ -221,9 +224,9 @@ const BatchList: React.FC = () => {
                 <Table
                     className={styles['tech-table']}
                     columns={columns}
-                    dataSource={data} // 👈 确保 data 被使用
+                    dataSource={data} // 👈 確保 data が使用されている
                     rowKey="id"
-                    loading={loading} // 👈 确保 loading 被使用
+                    loading={loading} // 👈 確保 loading が使用されている
                     pagination={{ pageSize: 10 }}
                     scroll={{ x: 1000 }}
                 />
