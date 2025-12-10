@@ -150,7 +150,13 @@ const BatchList: React.FC = () => {
             width: 180,
             render: (_, record) => (
                 <Space size="middle">
-                    <Button type="link" size="small" className={styles['tech-cursor-action']} onClick={() => message.info(`ID: ${record.id} を編集`)}>
+                    <Button
+                        type="link"
+                        size="small"
+                        className={styles['tech-cursor-action']}
+                        // 🎯 修正: /batchEdit/{id} へ遷移するように navigate を設定
+                        onClick={() => navigate(`/batchEdit/${record.id}`)}
+                    >
                         編集
                     </Button>
                     <Popconfirm

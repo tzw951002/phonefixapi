@@ -64,6 +64,128 @@ const getAuthToken = (): string | null => {
 // 💡 API 函数
 // -------------------------------------------------------------------------
 
+export const fetchBatchItemByIdApi = async (id: number): Promise<BatchItem> => {
+
+    const token = getAuthToken();
+    if (!token) {
+        throw new Error('認証トークンが見つかりません。再ログインしてください。');
+    }
+
+    const url = `${BASE_API_URL}/${id}`; // エンドポイントは /batch/{id}
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const defaultErrorMessage = `ID: ${id} のデータ取得に失敗しました`;
+
+        if (!response.ok) {
+            let errorMessage = defaultErrorMessage;
+            const clonedResponse = response.clone();
+
+            if (response.status === 401) {
+                throw new Error('認証失敗またはトークン期限切れです。再ログインしてください。');
+            }
+            if (response.status === 404) {
+                throw new Error(`バッチ設定 (ID: ${id}) が見つかりませんでした。`);
+            }
+
+            try {
+                const errorData = await clonedResponse.json();
+                if (errorData.detail) {
+                    errorMessage = errorData.detail;
+                } else if (errorData.message) {
+                    errorMessage = errorData.message;
+                } else {
+                    errorMessage = defaultErrorMessage;
+                }
+            } catch (e) {
+                if (response.status >= 400 && response.status < 600) {
+                    errorMessage = `${defaultErrorMessage} (HTTP Status: ${response.status})`;
+                } else {
+                    errorMessage = `HTTP エラー: ${response.status} ${response.statusText}`;
+                }
+            }
+
+            throw new Error(errorMessage);
+        }
+
+        return await response.json();
+
+    } catch (error) {
+        console.error('Fetch Batch Item By ID API Error:', error);
+        throw error;
+    }
+};
+
+
+export const updateBatchItemApi = async (id: number, data: BatchCreateData): Promise<BatchItem> => {
+
+    const token = getAuthToken();
+    if (!token) {
+        throw new Error('認証トークンが見つかりません。再ログインしてください。');
+    }
+
+    // 🎯 エンドポイントを /batch/{id} に修正
+    const url = `${BASE_API_URL}/${id}`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'PATCH', // 💡 PATCH メソッドを使用
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data), // 更新データを送信
+        });
+
+        const defaultErrorMessage = `ID: ${id} の更新に失敗しました`;
+
+        if (!response.ok) {
+            let errorMessage = defaultErrorMessage;
+            const clonedResponse = response.clone();
+
+            if (response.status === 401) {
+                throw new Error('認証失敗またはトークン期限切れです。再ログインしてください。');
+            }
+            if (response.status === 404) { // 404 も明確に処理
+                throw new Error(`Batch configuration with ID ${id} not found`);
+            }
+
+            try {
+                const errorData = await clonedResponse.json();
+                if (errorData.detail) {
+                    errorMessage = errorData.detail;
+                } else if (errorData.message) {
+                    errorMessage = errorData.message;
+                } else {
+                    errorMessage = defaultErrorMessage;
+                }
+            } catch (e) {
+                if (response.status >= 400 && response.status < 600) {
+                    errorMessage = `${defaultErrorMessage} (HTTP Status: ${response.status})`;
+                } else {
+                    errorMessage = `HTTP エラー: ${response.status} ${response.statusText}`;
+                }
+            }
+
+            throw new Error(errorMessage);
+        }
+
+        return await response.json();
+
+    } catch (error) {
+        console.error('Update Batch Item API Error:', error);
+        throw error;
+    }
+};
+
+
 /**
  * 封装的新增批次项目 API 调用
  */
