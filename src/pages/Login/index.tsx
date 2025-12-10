@@ -26,50 +26,45 @@ const Login: React.FC = () => {
     };
 
     return (
-        // 💡 关键修改 4: 渲染 contextHolder
-        <div className={styles['tech-container']}>
-            {contextHolder} {/* 必须放置在需要使用 messageApi 的组件的渲染树中 */}
-            {/* 新增用于实现流线型动画的元素 */}
-            <div className={styles['dynamic-lines-background']}></div>
+        <div className={styles['clean-container']}>
+            {contextHolder}
+
 
             <Form
                 form={form}
                 name="loginForm"
                 onFinish={onFinish}
-                className={styles['tech-form-panel']}
+                className={styles['clean-form-panel']}
                 layout="vertical"
             >
-                {/* ... 其他 Form 内容保持不变 ... */}
-                <h2 className={styles['tech-title']}>価格ネットバッチ</h2>
+                <h2 className={styles['clean-title']}>価格.com連携管理</h2>
 
                 <Form.Item
-                    label={<span className={styles['tech-label']}>ユーザーID</span>}
+                    label={<span className={styles['clean-label']}>ユーザID</span>}
                     name="username"
-                    rules={[{ required: true, message: 'ユーザーIDを入力してください' }]}
+                    rules={[{ required: true, message: 'ユーザIDを入力してください' }]}
                 >
-                    <Input className={styles['tech-input']} placeholder="ADMIN_UNIT_01" />
+                    <Input className={styles['clean-input']} placeholder="ADMIN_UNIT_01" />
                 </Form.Item>
 
                 <Form.Item
-                    label={<span className={styles['tech-label']}>セキュリティキー</span>}
+                    label={<span className={styles['clean-label']}>パスワード</span>}
                     name="password"
-                    rules={[{ required: true, message: 'セキュリティキーを入力してください' }]}
+                    rules={[{ required: true, message: 'パスワードを入力してください' }]}
                 >
-                    <Input.Password className={styles['tech-input']} placeholder="********" />
+                    <Input.Password className={styles['clean-input']} placeholder="********" />
                 </Form.Item>
 
-                <Form.Item className={styles['tech-item-button']}>
+                <Form.Item className={styles['clean-item-button']}>
                     <Button
-                        className={styles['tech-button']}
+                        className={styles['clean-button']}
                         type="primary"
                         htmlType="submit"
                         block
                     >
-                        認証ログイン
+                        ログイン
                     </Button>
                 </Form.Item>
-
-                <div className={styles['tech-footer-text']}>システムステータス：認証待機中...</div>
             </Form>
         </div>
     );
