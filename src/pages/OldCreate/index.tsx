@@ -52,7 +52,7 @@ const OldCreate: React.FC = () => {
         // 外部容器
         <div className={styles['clean-dashboard-container']}>
             <div className={styles['clean-panel']} style={{ maxWidth: 1000, margin: '0 auto' }}>
-                <h2 className={styles['clean-title']}>Old 設定 新規作成</h2>
+                <h2 className={styles['clean-title']}>中古新規作成</h2>
 
                 <Form
                     form={form}

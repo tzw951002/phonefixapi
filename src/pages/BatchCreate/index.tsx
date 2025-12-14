@@ -41,7 +41,7 @@ const BatchCreate: React.FC = () => {
             {/* 移除发光背景 <div className={styles['tech-background-glow']}></div> */}
 
             <div className={styles['clean-panel']} style={{ maxWidth: 800, margin: '0 auto' }}>
-                <h2 className={styles['clean-title']}>対象新規</h2>
+                <h2 className={styles['clean-title']}>新品対象新規</h2>
 
                 <Form
                     form={form}

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Table, Form, Input, Button, Space, Tag, Popconfirm, message, Menu, Layout } from 'antd';
 import type { TableProps, ColumnType } from 'antd/lib/table';
 // 🌟 新增图标导入
-import { MenuFoldOutlined, MenuUnfoldOutlined, AppstoreOutlined, ShopOutlined } from '@ant-design/icons';
+import { MenuFoldOutlined, MenuUnfoldOutlined, AppstoreOutlined, ShopOutlined, LogoutOutlined } from '@ant-design/icons'; // 💡 导入 LogoutOutlined
 
 // 💡 导入 Batch 相关的 API 和类型 (保持不变)
 import { fetchBatchListApi, deleteBatchItemApi, BatchItem, BatchQuery } from '../../services/batch';
@@ -50,12 +50,19 @@ const BatchList: React.FC = () => {
         {
             key: 'new',
             icon: <AppstoreOutlined />,
-            label: '新品一覧 (Batch)',
+            label: '新品一覧',
         },
         {
             key: 'used',
             icon: <ShopOutlined />,
-            label: '中古品一覧 (Old)',
+            label: '中古品一覧',
+        },
+        // 💡 退出按钮
+        {
+            key: 'logout',
+            icon: <LogoutOutlined />,
+            label: 'ログアウト',
+            danger: true, // 标记为危险操作，通常会显示红色
         },
     ];
 
@@ -109,9 +116,21 @@ const BatchList: React.FC = () => {
 
     const onFinish = (values: UnifiedQuery) => { loadData(values); };
 
+    // 💡 菜单点击处理逻辑
     const handleMenuClick = (e: { key: string }) => {
+        if (e.key === 'logout') {
+            // 1. 清空本地缓存
+            localStorage.clear();
+            message.success('ログアウトしました。');
+
+            // 2. 导航到主页面 (/)
+            navigate('/', { replace: true });
+            return;
+        }
+
+        // 处理其他菜单项（new / used）
         setActiveKey(e.key as ProductTypeKey);
-        // 💡 切换菜单时，更新 URL 参数
+        // 切换菜单时，更新 URL 参数
         navigate(`/batchList?tab=${e.key}`, { replace: true });
     };
 
@@ -142,8 +161,8 @@ const BatchList: React.FC = () => {
     const columns: TableProps<UnifiedItem>['columns'] = useMemo(() => {
         const baseColumns: ColumnType<UnifiedItem>[] = [
             { title: '商品名', dataIndex: 'good_name', key: 'good_name', width: 180 },
-            { title: 'Makeshop Code', dataIndex: 'makeshop_identifier', key: 'makeshop_identifier', width: 150 },
-            { title: 'Kakaku ID', dataIndex: 'kakaku_product_id', key: 'kakaku_product_id', width: 150 },
+            { title: 'Makeshop独自商品コード', dataIndex: 'makeshop_identifier', key: 'makeshop_identifier', width: 150 },
+            { title: '価格.com商品ID', dataIndex: 'kakaku_product_id', key: 'kakaku_product_id', width: 150 },
         ];
 
         const oldSpecificColumns: ColumnType<UnifiedItem>[] = [
@@ -219,14 +238,21 @@ const BatchList: React.FC = () => {
                         onClick={handleMenuClick}
                         items={menuItems}
                         className={styles['custom-menu']}
+                        // 💡 将退出按钮放在底部
+                        style={{ height: 'calc(100% - 64px)' }}
                     />
+
+                    {/* 💡 另一个更 Ant Design 风格的做法是将 Logout 放在 Menu 外，这里使用 Menu 内嵌的方式，
+                         但需要调整 Menu 的高度使其能推到底部，或者使用 Footer/Divider 隔离。
+                         为保持代码简洁，暂时使用内嵌并设置高度的方式。 */}
+
                 </Layout.Sider>
 
                 <Layout className={styles['site-layout']}>
                     <Layout.Content style={{ margin: '24px 24px', minHeight: 280 }}>
                         <div className={styles['clean-panel']}>
                             <h2 className={styles['clean-title']}>
-                                {activeKey === 'new' ? '📦 新品商品一覧 (Batch)' : '♻️ 中古商品一覧 (Old)'}
+                                {activeKey === 'new' ? '📦 新品一覧' : '♻️ 中古品一覧'}
                             </h2>
 
                             {/* 检索表单 */}
@@ -234,10 +260,10 @@ const BatchList: React.FC = () => {
                                 <Form.Item label="商品名" name="good_name">
                                     <Input className={styles['clean-input-small']} placeholder="Name..." allowClear />
                                 </Form.Item>
-                                <Form.Item label="M_Code" name="makeshop_identifier">
+                                <Form.Item label="Makeshop独自商品コード" name="makeshop_identifier">
                                     <Input className={styles['clean-input-small']} placeholder="M_SKU..." allowClear />
                                 </Form.Item>
-                                <Form.Item label="K_ID" name="kakaku_product_id">
+                                <Form.Item label="価格.com商品ID" name="kakaku_product_id">
                                     <Input className={styles['clean-input-small']} placeholder="K_ID..." allowClear />
                                 </Form.Item>
 

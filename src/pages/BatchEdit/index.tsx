@@ -97,7 +97,7 @@ const BatchEdit: React.FC = () => {
         <div className={styles['clean-dashboard-container']}>
 
             <div className={styles['clean-panel']} style={{ maxWidth: 800, margin: '0 auto' }}>
-                <h2 className={styles['clean-title']}>対象編集 (ID: {itemId})</h2>
+                <h2 className={styles['clean-title']}>新品対象編集</h2>
 
                 <Form
                     form={form}

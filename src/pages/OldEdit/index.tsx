@@ -105,7 +105,7 @@ const OldEdit: React.FC = () => {
         <div className={styles['clean-dashboard-container']}>
 
             <div className={styles['clean-panel']} style={{ maxWidth: 1000, margin: '0 auto' }}>
-                <h2 className={styles['clean-title']}>Old 設定 編集 (ID: {itemId})</h2>
+                <h2 className={styles['clean-title']}>中古対象編集</h2>
 
                 <Form
                     form={form}
