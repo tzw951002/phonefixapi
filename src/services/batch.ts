@@ -12,6 +12,7 @@ export type BatchType = 1 | 2 | 3 | 4;
 // 对应数据库表的行数据结构
 export interface BatchItem {
     id: number;
+    good_name: string;
     makeshop_identifier: string;
     kakaku_product_id: string;
     batch_type: BatchType; // 👈 统一使用 1 | 2 | 3 | 4
@@ -21,12 +22,14 @@ export interface BatchItem {
 
 // 检索表单的字段结构
 export interface BatchQuery {
+    good_name?: string;
     makeshop_identifier?: string;
     kakaku_product_id?: string;
 }
 
 // 创建批次项目所需的数据结构（与 BatchItem 类似，但不包含 id）
 export interface BatchCreateData {
+    good_name: string;
     makeshop_identifier: string;
     kakaku_product_id: string;
     batch_type: BatchType; // 👈 统一使用 1 | 2 | 3 | 4
@@ -258,6 +261,9 @@ export const fetchBatchListApi = async (query: BatchQuery): Promise<BatchItem[]>
 
     // 2. 构建 URL 和查询参数
     const params = new URLSearchParams();
+    if (query.good_name) {
+        params.append('good_name', query.good_name);
+    }
     if (query.makeshop_identifier) {
         params.append('makeshop_identifier', query.makeshop_identifier);
     }
@@ -311,6 +317,7 @@ export const fetchBatchListApi = async (query: BatchQuery): Promise<BatchItem[]>
             throw new Error(errorMessage);
         }
 
+        console.log(response)
         // 成功响应处理
         return await response.json();
 

@@ -89,93 +89,99 @@ const BatchEdit: React.FC = () => {
     }
 
     return (
-        <div className={styles['tech-dashboard-container']}>
-            <div className={styles['tech-background-glow']}></div>
+        // 外部容器：应用浅色背景
+        <div className={styles['clean-dashboard-container']}>
+            {/* 移除发光背景 <div className={styles['tech-background-glow']}></div> */}
 
-            <div className={styles['tech-panel']} style={{ maxWidth: 800, margin: '0 auto' }}>
-                <h2 className={styles['tech-title']}>🖊️ バッチタスク編集 (ID: {itemId})</h2>
+            <div className={styles['clean-panel']} style={{ maxWidth: 800, margin: '0 auto' }}>
+                <h2 className={styles['clean-title']}>対象編集</h2>
 
                 <Form
                     form={form}
-                    name="batch_edit_form"
+                    name="batch_create_form"
                     onFinish={onFinish}
-                    layout="vertical"
-                    className={styles['tech-search-form']}
-                    // initialValues は useEffect で設定するためここでは不要
+                    layout="vertical" // 垂直布局，更适合表单
+                    className={styles['clean-form-container']} // 新增的 form 容器样式
+                    initialValues={{ batch_type: 1, is_enabled: true, min_price_threshold: undefined }}
                 >
-                    {/* 1. Makeshop識別子 */}
                     <Form.Item
-                        label={<span className={styles['tech-label']}>Makeshop識別子</span>}
+                        label={<span className={styles['clean-label']}>商品名</span>}
+                        name="good_name"
+                        rules={[{ required: true, message: '商品名は必須です' }]}
+                    >
+                        <Input className={styles['clean-input']} placeholder="Good Name" />
+                    </Form.Item>
+                    {/* 1. Makeshop识别符 (文本输入) */}
+                    <Form.Item
+                        label={<span className={styles['clean-label']}>Makeshop独自商品コード</span>}
                         name="makeshop_identifier"
-                        rules={[{ required: true, message: 'Makeshop識別子は必須です。' }]}
+                        rules={[{ required: true, message: 'Makeshop独自商品コードは必須です' }]}
                     >
-                        <Input className={styles['tech-input']} placeholder="M_SKU_XXXX" />
+                        <Input className={styles['clean-input']} placeholder="M_SKU_XXXX" />
                     </Form.Item>
 
-                    {/* 2. 価格.com商品ID */}
+                    {/* 2. 価格.com商品ID (文本输入) */}
                     <Form.Item
-                        label={<span className={styles['tech-label']}>価格.com商品ID</span>}
+                        label={<span className={styles['clean-label']}>価格.com商品ID</span>}
                         name="kakaku_product_id"
-                        rules={[{ required: true, message: '価格.com商品IDは必須です。' }]}
+                        rules={[{ required: true, message: '価格.com商品IDは必須です' }]}
                     >
-                        <Input className={styles['tech-input']} placeholder="K_ID_YYYY" />
+                        <Input className={styles['clean-input']} placeholder="K_ID_YYYY" />
                     </Form.Item>
 
-                    {/* 3. バッチ種類 */}
+                    {/* 3. 批次类型 (下拉选择) */}
                     <Form.Item
-                        label={<span className={styles['tech-label']}>バッチ種類</span>}
+                        label={<span className={styles['clean-label']}>価格順位</span>}
                         name="batch_type"
-                        rules={[{ required: true, message: 'バッチ種類を選択してください。' }]}
+                        rules={[{ required: true, message: '価格順位を選んでください' }]}
                     >
                         <Select
-                            className={styles['tech-input']}
-                            placeholder="種類を選択"
-                            dropdownStyle={{ background: '#0a192f', border: '1px solid #4DD0E1' }}
+                            className={styles['clean-select']} // 针对 Select 的新样式
+                            placeholder="选择类型"
                         >
-                            <Option value={1}>最安値 (1)</Option>
-                            <Option value={2}>1位と同じ価格 (2)</Option>
-                            <Option value={3}>2位価格 (3)</Option>
-                            <Option value={4}>3位価格 (4)</Option>
+                            <Option value={1}>最安値</Option>
+                            <Option value={2}>1位と同じ価格</Option>
+                            <Option value={3}>2位価格</Option>
+                            <Option value={4}>3位価格</Option>
                         </Select>
                     </Form.Item>
 
-                    {/* 4. 最低価格閾値 */}
+                    {/* 4. 最低价格阈值 (数字输入，可选) */}
                     <Form.Item
-                        label={<span className={styles['tech-label']}>最低価格閾値 (円)</span>}
+                        label={<span className={styles['clean-label']}>最低価格閾値</span>}
                         name="min_price_threshold"
-                        rules={[{ type: 'number', min: 0, message: '0以上の数値を入力してください。' }]}
+                        rules={[{ type: 'number', min: 0, message: '请输入0以上的数值。' }]}
                     >
                         <InputNumber
-                            className={styles['tech-input']}
+                            className={styles['clean-input']} // 复用输入框样式
                             style={{ width: '100%' }}
-                            placeholder="5000 (オプション)"
+                            placeholder="5000 (可选)"
                             min={0}
                             formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                            // parser={value => value ? value.replace(/\$\s?|(,*)/g, '') : ''}
                         />
                     </Form.Item>
 
-                    {/* 5. 有効状態 */}
+                    {/* 5. 有效状态 (开关) */}
                     <Form.Item
-                        label={<span className={styles['tech-label']}>有効状態</span>}
+                        label={<span className={styles['clean-label']}>状態</span>}
                         name="is_enabled"
                         valuePropName="checked"
                     >
-                        <Switch />
+                        <Switch className={styles['clean-switch']} /> {/* 针对 Switch 的新样式 */}
                     </Form.Item>
 
-                    {/* 6. 操作ボタン */}
+                    {/* 6. 操作按钮 */}
                     <Form.Item style={{ marginTop: 30 }}>
                         <Space>
                             <Button
                                 type="primary"
                                 htmlType="submit"
-                                className={`${styles['tech-button']} ${styles['tech-cursor-action']}`}
+                                className={styles['clean-button-primary']} // 强调色按钮
                             >
-                                更新して保存
+                                保存
                             </Button>
                             <Button
-                                className={`${styles['tech-button-small-secondary']} ${styles['tech-cursor-action']}`}
+                                className={styles['clean-button-reset']} // 次要按钮
                                 onClick={() => navigate('/batchList')}
                             >
                                 キャンセル

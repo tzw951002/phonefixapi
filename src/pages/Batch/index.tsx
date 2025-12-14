@@ -100,13 +100,13 @@ const BatchList: React.FC = () => {
     // 表格列配置
     const columns: TableProps<BatchItem>['columns'] = [
         {
-            title: 'ID',
-            dataIndex: 'id',
-            key: 'id',
-            width: 80,
+            title: '商品名',
+            dataIndex: 'good_name',
+            key: 'good_name',
+            width: 200,
         },
         {
-            title: 'Makeshop識別子',
+            title: 'Makeshop独自商品コード',
             dataIndex: 'makeshop_identifier',
             key: 'makeshop_identifier',
             width: 200,
@@ -118,7 +118,7 @@ const BatchList: React.FC = () => {
             width: 200,
         },
         {
-            title: 'バッチ種類',
+            title: '価格順位',
             dataIndex: 'batch_type',
             key: 'batch_type',
             width: 120,
@@ -133,7 +133,7 @@ const BatchList: React.FC = () => {
             render: (price: number | null) => (price ? `${price.toLocaleString()} 円` : 'なし'),
         },
         {
-            title: '有効状態',
+            title: '状態',
             dataIndex: 'is_enabled',
             key: 'is_enabled',
             width: 100,
@@ -176,63 +176,69 @@ const BatchList: React.FC = () => {
     ];
 
     return (
-        // 外部容器：应用全局光标样式
-        <div className={styles['tech-dashboard-container']}>
-            <div className={styles['tech-background-glow']}></div>
+        // 外部容器
+        <div className={styles['clean-dashboard-container']}>
+            {/* 移除发光背景 <div className={styles['tech-background-glow']}></div> */}
 
-            <div className={styles['tech-panel']}>
-                <h2 className={styles['tech-title']}>⚙️ バッチ設定管理</h2>
+            <div className={styles['clean-panel']}>
+                <h2 className={styles['clean-title']}>⚙️価格.com対象商品一覧</h2>
 
                 {/* 检索表单 */}
                 <Form
                     form={form}
                     name="batch_search"
                     layout="inline"
-                    onFinish={onFinish} // 👈 確保 onFinish が使用されている
-                    className={styles['tech-search-form']}
+                    onFinish={onFinish}
+                    className={styles['clean-search-form']}
                 >
                     <Form.Item
-                        label={<span className={styles['tech-label']}>Makeshop識別子</span>}
+                        label={<span className={styles['clean-label']}>商品名</span>}
+                        name="good_name"
+                    >
+                        <Input className={styles['clean-input-small']} placeholder="Good Name..." allowClear />
+                    </Form.Item>
+                    <Form.Item
+                        label={<span className={styles['clean-label']}>Makeshop独自商品コード</span>}
                         name="makeshop_identifier"
                     >
-                        <Input className={styles['tech-input']} placeholder="M_SKU_..." allowClear />
+                        <Input className={styles['clean-input-small']} placeholder="M_SKU_..." allowClear />
                     </Form.Item>
 
                     <Form.Item
-                        label={<span className={styles['tech-label']}>価格.com商品ID</span>}
+                        label={<span className={styles['clean-label']}>価格.com商品ID</span>}
                         name="kakaku_product_id"
                     >
-                        <Input className={styles['tech-input']} placeholder="K_ID_..." allowClear />
+                        <Input className={styles['clean-input-small']} placeholder="K_ID_..." allowClear />
                     </Form.Item>
 
                     <Form.Item>
-                        {/* 検索ボタン */}
-                        <Button className={`${styles['tech-button-small']} ${styles['tech-cursor-action']}`} type="primary" htmlType="submit">
+                        {/* 搜索按钮 */}
+                        <Button className={styles['clean-button-search']} type="primary" htmlType="submit">
                             検索
                         </Button>
                     </Form.Item>
                     <Form.Item>
-                        {/* リセットボタン */}
-                        <Button className={`${styles['tech-button-small-secondary']} ${styles['tech-cursor-action']}`} onClick={() => form.resetFields()}>
-                            リセット
+                        {/* 重置按钮 */}
+                        <Button className={styles['clean-button-reset']} onClick={() => form.resetFields()}>
+                            クリア
                         </Button>
                     </Form.Item>
                 </Form>
 
-                {/* ツールバー（新規作成ボタン） */}
-                <div className={styles['tech-toolbar']}>
-                    <Button className={`${styles['tech-button']} ${styles['tech-cursor-action']}`} type="primary" onClick={() => navigate('/batchCreate')}>
-                        新規作成
+                {/* 工具栏（新建按钮） */}
+                <div className={styles['clean-toolbar']}>
+                    <Button className={styles['clean-button-primary']} type="primary" onClick={() => navigate('/batchCreate')}>
+                        新規
                     </Button>
                 </div>
 
                 {/* 表格 */}
                 <Table
-                    className={styles['tech-table']}
+                    className={styles['clean-table']}
                     columns={columns}
-                    dataSource={data} // 👈 確保 data が使用されている
+                    dataSource={data}
                     rowKey="id"
-                    loading={loading} // 👈 確保 loading が使用されている
+                    loading={loading}
                     pagination={{ pageSize: 10 }}
                     scroll={{ x: 1000 }}
                 />
