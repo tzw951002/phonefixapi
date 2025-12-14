@@ -26,27 +26,28 @@ const BatchEdit: React.FC = () => {
 
         const loadInitialData = async () => {
             try {
-                // 🎯 実際の API 呼び出しに置き換え
+                // 🎯 实际的 API 呼び出し
                 const itemData = await fetchBatchItemByIdApi(itemId);
 
                 // フォームに初期値をセット
                 form.setFieldsValue({
                     ...itemData,
+                    // 🚨 修复点 1: 确保 is_enabled 始终为布尔值 (例如，API 返回 null 时默认为 false)
+                    is_enabled: !!itemData.is_enabled,
+
                     // null を undefined に変換して InputNumber のプレースホルダーを有効にする
                     min_price_threshold: itemData.min_price_threshold || undefined,
                 });
             } catch (error) {
                 console.error('データのロードに失敗しました:', error);
                 message.error(error instanceof Error ? error.message : 'データのロードに失敗しました。');
-                // エラー時はリストに戻るなどの処理も検討
-                // navigate('/batchList');
             } finally {
                 setLoading(false);
             }
         };
 
         loadInitialData();
-    }, [itemId, form, navigate]); // navigate を依存配列に追加
+    }, [itemId, form, navigate]);
 
 
     // 2. 更新処理
@@ -58,6 +59,9 @@ const BatchEdit: React.FC = () => {
 
         const dataToSubmit: BatchCreateData = {
             ...values,
+            // 🚨 修复点 2: 确保 is_enabled 在发送前是明确的布尔值 (虽然 AntD 应该已经处理，但明确处理更安全)
+            is_enabled: !!values.is_enabled,
+
             // 空の文字列 ('') を null に変換して API に送信
             min_price_threshold: values.min_price_threshold || null,
         };
@@ -71,7 +75,7 @@ const BatchEdit: React.FC = () => {
             message.success({ content: `バッチタスク (ID: ${result.id}) を更新しました！`, key: 'update', duration: 3 });
 
             // 成功後、リストページに戻る
-            navigate('/batchList');
+            navigate('/batchList?tab=new'); // 💡 确保跳转回列表页时选中 'new' tab
 
         } catch (error) {
             console.error('Update Error:', error);
@@ -91,17 +95,17 @@ const BatchEdit: React.FC = () => {
     return (
         // 外部容器：应用浅色背景
         <div className={styles['clean-dashboard-container']}>
-            {/* 移除发光背景 <div className={styles['tech-background-glow']}></div> */}
 
             <div className={styles['clean-panel']} style={{ maxWidth: 800, margin: '0 auto' }}>
-                <h2 className={styles['clean-title']}>対象編集</h2>
+                <h2 className={styles['clean-title']}>対象編集 (ID: {itemId})</h2>
 
                 <Form
                     form={form}
-                    name="batch_create_form"
+                    name="batch_edit_form" // 💡 建议将名称从 create 改为 edit
                     onFinish={onFinish}
-                    layout="vertical" // 垂直布局，更适合表单
-                    className={styles['clean-form-container']} // 新增的 form 容器样式
+                    layout="vertical"
+                    className={styles['clean-form-container']}
+                    // 💡 initialValues 仅作为 fallback，实际值由 setFieldsValue 设定
                     initialValues={{ batch_type: 1, is_enabled: true, min_price_threshold: undefined }}
                 >
                     <Form.Item
@@ -136,7 +140,7 @@ const BatchEdit: React.FC = () => {
                         rules={[{ required: true, message: '価格順位を選んでください' }]}
                     >
                         <Select
-                            className={styles['clean-select']} // 针对 Select 的新样式
+                            className={styles['clean-select']}
                             placeholder="选择类型"
                         >
                             <Option value={1}>最安値</Option>
@@ -153,7 +157,7 @@ const BatchEdit: React.FC = () => {
                         rules={[{ type: 'number', min: 0, message: '请输入0以上的数值。' }]}
                     >
                         <InputNumber
-                            className={styles['clean-input']} // 复用输入框样式
+                            className={styles['clean-input']}
                             style={{ width: '100%' }}
                             placeholder="5000 (可选)"
                             min={0}
@@ -163,11 +167,11 @@ const BatchEdit: React.FC = () => {
 
                     {/* 5. 有效状态 (开关) */}
                     <Form.Item
-                        label={<span className={styles['clean-label']}>状態</span>}
+                        label={<span className={styles['clean-label']}>状態 (有効)</span>}
                         name="is_enabled"
                         valuePropName="checked"
                     >
-                        <Switch className={styles['clean-switch']} /> {/* 针对 Switch 的新样式 */}
+                        <Switch className={styles['clean-switch']} />
                     </Form.Item>
 
                     {/* 6. 操作按钮 */}
@@ -182,7 +186,7 @@ const BatchEdit: React.FC = () => {
                             </Button>
                             <Button
                                 className={styles['clean-button-reset']} // 次要按钮
-                                onClick={() => navigate('/batchList')}
+                                onClick={() => navigate('/batchList?tab=new')} // 💡 确保跳转回列表页时选中 'new' tab
                             >
                                 キャンセル
                             </Button>
