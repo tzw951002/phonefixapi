@@ -1,56 +1,75 @@
-// src/services/batch.ts
+// src/services/old.ts
 
 import {API_BASE_URL} from "../config/api"; // 确保 API_BASE_URL 导入路径正确
 
 // -------------------------------------------------------------------------
-// 💡 类型定义
+// 💡 类型定义 (Old 配置)
 // -------------------------------------------------------------------------
 
-// 🎯 统一类型别名
-export type BatchType = 1 | 2 | 3 | 4;
+// 🎯 统一类型别名 (配置类型，沿用 BatchType)
+export type OldType = 1 | 2 | 3 | 4;
 
-// 对应数据库表的行数据结构
-export interface BatchItem {
+// 对应数据库表的行数据结构 (DBOld)
+export interface OldItem {
     id: number;
     good_name: string;
     makeshop_identifier: string;
     kakaku_product_id: string;
-    batch_type: BatchType; // 👈 统一使用 1 | 2 | 3 | 4
+    batch_type: OldType;
     is_enabled: boolean;
     min_price_threshold: number | null;
+
+    // ⬇️ 新增的字段 ⬇️
+    good_status: string | null;
+    missing_info: string | null;
+    accessories_info: string | null;
+    detail_comment: string | null;
+    serial_number: string | null;
+    // ⬆️ 新增的字段 ⬆️
 }
 
-// 检索表单的字段结构
-export interface BatchQuery {
+// 检索表单的字段结构 (OldQuery)
+export interface OldQuery {
     good_name?: string;
     makeshop_identifier?: string;
     kakaku_product_id?: string;
+    batch_type?: OldType;
+    is_enabled?: boolean;
+    good_status?: string; // 增加 good_status 过滤
+    // 可以继续增加其他新增字段的过滤，这里仅以 good_status 为例
 }
 
-// 创建批次项目所需的数据结构（与 BatchItem 类似，但不包含 id）
-export interface BatchCreateData {
+// 创建/更新 Old 项目所需的数据结构
+export interface OldCreateData {
     good_name: string;
     makeshop_identifier: string;
     kakaku_product_id: string;
-    batch_type: BatchType; // 👈 统一使用 1 | 2 | 3 | 4
+    batch_type: OldType;
     is_enabled: boolean;
     min_price_threshold: number | null;
-}
 
+    // ⬇️ 新增的字段 ⬇️
+    good_status: string | null;
+    missing_info: string | null;
+    accessories_info: string | null;
+    detail_comment: string | null;
+    serial_number: string | null;
+    // ⬆️ 新增的字段 ⬆️
+}
 
 
 // -------------------------------------------------------------------------
 // 💡 API URL
 // -------------------------------------------------------------------------
 
-// 基础 API URL (用于删除)
-const BASE_API_URL = `${API_BASE_URL}/batch`;
+// 基础 API URL (用于删除/获取单个/更新)
+const BASE_API_OLD_URL = `${API_BASE_URL}/old`;
 
 // 新增 API URL
-const CREATE_API_URL = `${API_BASE_URL}/batch/create`;
+const CREATE_OLD_API_URL = `${API_BASE_URL}/old/create`;
 
 // 列表 API URL
-const BATCH_LIST_API_URL = `${API_BASE_URL}/batch/getList`;
+const OLD_LIST_API_URL = `${API_BASE_URL}/old/getList`;
 
 // -------------------------------------------------------------------------
 // 💡 辅助函数
@@ -66,17 +85,20 @@ const getAuthToken = (): string | null => {
 };
 
 // -------------------------------------------------------------------------
-// 💡 API 函数
+// 💡 API 函数 (Old 配置)
 // -------------------------------------------------------------------------
 
-export const fetchBatchItemByIdApi = async (id: number): Promise<BatchItem> => {
+/**
+ * 根据 ID 获取单个 Old 配置详情
+ */
+export const fetchOldItemByIdApi = async (id: number): Promise<OldItem> => {
 
     const token = getAuthToken();
     if (!token) {
         throw new Error('認証トークンが見つかりません。再ログインしてください。');
     }
 
-    const url = `${BASE_API_URL}/${id}`; // エンドポイントは /batch/{id}
+    const url = `${BASE_API_OLD_URL}/${id}`;
 
     try {
         const response = await fetch(url, {
@@ -97,24 +119,16 @@ export const fetchBatchItemByIdApi = async (id: number): Promise<BatchItem> => {
                 throw new Error('認証失敗またはトークン期限切れです。再ログインしてください。');
             }
             if (response.status === 404) {
-                throw new Error(`バッチ設定 (ID: ${id}) が見つかりませんでした。`);
+                throw new Error(`Old 設定 (ID: ${id}) が見つかりませんでした。`);
             }
 
             try {
                 const errorData = await clonedResponse.json();
-                if (errorData.detail) {
-                    errorMessage = errorData.detail;
-                } else if (errorData.message) {
-                    errorMessage = errorData.message;
-                } else {
-                    errorMessage = defaultErrorMessage;
-                }
+                errorMessage = errorData.detail || errorData.message || defaultErrorMessage;
             } catch (e) {
-                if (response.status >= 400 && response.status < 600) {
-                    errorMessage = `${defaultErrorMessage} (HTTP Status: ${response.status})`;
-                } else {
-                    errorMessage = `HTTP エラー: ${response.status} ${response.statusText}`;
-                }
+                errorMessage = (response.status >= 400 && response.status < 600)
+                    ? `${defaultErrorMessage} (HTTP Status: ${response.status})`
+                    : `HTTP エラー: ${response.status} ${response.statusText}`;
             }
 
             throw new Error(errorMessage);
@@ -123,25 +137,27 @@ export const fetchBatchItemByIdApi = async (id: number): Promise<BatchItem> => {
         return await response.json();
 
     } catch (error) {
-        console.error('Fetch Batch Item By ID API Error:', error);
+        console.error('Fetch Old Item By ID API Error:', error);
         throw error;
     }
 };
 
 
-export const updateBatchItemApi = async (id: number, data: BatchCreateData): Promise<BatchItem> => {
+/**
+ * 更新单个 Old 配置
+ */
+export const updateOldItemApi = async (id: number, data: OldCreateData): Promise<OldItem> => {
 
     const token = getAuthToken();
     if (!token) {
         throw new Error('認証トークンが見つかりません。再ログインしてください。');
     }
 
-    // 🎯 エンドポイントを /batch/{id} に修正
-    const url = `${BASE_API_URL}/${id}`;
+    const url = `${BASE_API_OLD_URL}/${id}`;
 
     try {
         const response = await fetch(url, {
-            method: 'PATCH', // 💡 PATCH メソッドを使用
+            method: 'PATCH', // PATCH メソッドを使用
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -158,25 +174,17 @@ export const updateBatchItemApi = async (id: number, data: BatchCreateData): Pro
             if (response.status === 401) {
                 throw new Error('認証失敗またはトークン期限切れです。再ログインしてください。');
             }
-            if (response.status === 404) { // 404 も明確に処理
-                throw new Error(`Batch configuration with ID ${id} not found`);
+            if (response.status === 404) {
+                throw new Error(`Old configuration with ID ${id} not found`);
             }
 
             try {
                 const errorData = await clonedResponse.json();
-                if (errorData.detail) {
-                    errorMessage = errorData.detail;
-                } else if (errorData.message) {
-                    errorMessage = errorData.message;
-                } else {
-                    errorMessage = defaultErrorMessage;
-                }
+                errorMessage = errorData.detail || errorData.message || defaultErrorMessage;
             } catch (e) {
-                if (response.status >= 400 && response.status < 600) {
-                    errorMessage = `${defaultErrorMessage} (HTTP Status: ${response.status})`;
-                } else {
-                    errorMessage = `HTTP エラー: ${response.status} ${response.statusText}`;
-                }
+                errorMessage = (response.status >= 400 && response.status < 600)
+                    ? `${defaultErrorMessage} (HTTP Status: ${response.status})`
+                    : `HTTP エラー: ${response.status} ${response.statusText}`;
             }
 
             throw new Error(errorMessage);
@@ -185,16 +193,16 @@ export const updateBatchItemApi = async (id: number, data: BatchCreateData): Pro
         return await response.json();
 
     } catch (error) {
-        console.error('Update Batch Item API Error:', error);
+        console.error('Update Old Item API Error:', error);
         throw error;
     }
 };
 
 
 /**
- * 封装的新增批次项目 API 调用
+ * 创建新的 Old 配置项目
  */
-export const createBatchItemApi = async (data: BatchCreateData): Promise<BatchItem> => {
+export const createOldItemApi = async (data: OldCreateData): Promise<OldItem> => {
 
     const token = getAuthToken();
     if (!token) {
@@ -202,7 +210,7 @@ export const createBatchItemApi = async (data: BatchCreateData): Promise<BatchIt
     }
 
     try {
-        const response = await fetch(CREATE_API_URL, {
+        const response = await fetch(CREATE_OLD_API_URL, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -220,22 +228,18 @@ export const createBatchItemApi = async (data: BatchCreateData): Promise<BatchIt
             if (response.status === 401) {
                 throw new Error('認証失敗またはトークン期限切れです。再ログインしてください。');
             }
+            // 409 冲突也需要处理（组合标识符已存在）
+            if (response.status === 409) {
+                throw new Error('このMakeshop/Kakaku IDの組み合わせは既に存在します。');
+            }
 
             try {
                 const errorData = await clonedResponse.json();
-                if (errorData.detail) {
-                    errorMessage = errorData.detail;
-                } else if (errorData.message) {
-                    errorMessage = errorData.message;
-                } else {
-                    errorMessage = defaultErrorMessage;
-                }
+                errorMessage = errorData.detail || errorData.message || defaultErrorMessage;
             } catch (e) {
-                if (response.status >= 400 && response.status < 600) {
-                    errorMessage = `${defaultErrorMessage} (HTTP Status: ${response.status})`;
-                } else {
-                    errorMessage = `HTTP エラー: ${response.status} ${response.statusText}`;
-                }
+                errorMessage = (response.status >= 400 && response.status < 600)
+                    ? `${defaultErrorMessage} (HTTP Status: ${response.status})`
+                    : `HTTP エラー: ${response.status} ${response.statusText}`;
             }
 
             throw new Error(errorMessage);
@@ -244,24 +248,23 @@ export const createBatchItemApi = async (data: BatchCreateData): Promise<BatchIt
         return await response.json();
 
     } catch (error) {
-        console.error('Create Batch Item API Error:', error);
+        console.error('Create Old Item API Error:', error);
         throw error;
     }
 };
 
 
 /**
- * 封装的批次列表数据获取 API 调用
+ * 获取 Old 配置列表数据
  */
-export const fetchBatchListApi = async (query: BatchQuery): Promise<BatchItem[]> => {
+export const fetchOldListApi = async (query: OldQuery): Promise<OldItem[]> => {
 
-    // 1. 获取认证 Token
     const token = getAuthToken();
     if (!token) {
         throw new Error('認証トークンが見つかりません。再ログインしてください。');
     }
 
-    // 2. 构建 URL 和查询参数
+    // 构建 URL 和查询参数
     const params = new URLSearchParams();
     if (query.good_name) {
         params.append('good_name', query.good_name);
@@ -272,15 +275,26 @@ export const fetchBatchListApi = async (query: BatchQuery): Promise<BatchItem[]>
     if (query.kakaku_product_id) {
         params.append('kakaku_product_id', query.kakaku_product_id);
     }
+    if (query.batch_type !== undefined) {
+        params.append('batch_type', String(query.batch_type));
+    }
+    if (query.is_enabled !== undefined) {
+        params.append('is_enabled', String(query.is_enabled));
+    }
+    // 增加新增字段的查询参数
+    if (query.good_status) {
+        params.append('good_status', query.good_status);
+    }
 
-    const url = `${BATCH_LIST_API_URL}?${params.toString()}`;
+
+    const url = `${OLD_LIST_API_URL}?${params.toString()}`;
 
     try {
-        // 3. 发送请求，包含 Authorization Header
+        // 发送请求
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`, // 👈 Bearer Token 认证
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
         });
@@ -291,63 +305,48 @@ export const fetchBatchListApi = async (query: BatchQuery): Promise<BatchItem[]>
             let errorMessage = defaultErrorMessage;
             const clonedResponse = response.clone();
 
-            // 特殊处理 401 认证失败
             if (response.status === 401) {
                 throw new Error('認証失敗またはトークン期限切れです。再ログインしてください。');
             }
 
             try {
-                // 尝试解析后端返回的 JSON 错误体
                 const errorData = await clonedResponse.json();
-
-                if (errorData.detail) {
-                    errorMessage = errorData.detail;
-                } else if (errorData.message) {
-                    errorMessage = errorData.message;
-                } else {
-                    errorMessage = defaultErrorMessage;
-                }
-
+                errorMessage = errorData.detail || errorData.message || defaultErrorMessage;
             } catch (e) {
-                // 如果不是 JSON 错误体
-                if (response.status >= 400 && response.status < 600) {
-                    errorMessage = `${defaultErrorMessage} (HTTP Status: ${response.status})`;
-                } else {
-                    errorMessage = `HTTP エラー: ${response.status} ${response.statusText}`;
-                }
+                errorMessage = (response.status >= 400 && response.status < 600)
+                    ? `${defaultErrorMessage} (HTTP Status: ${response.status})`
+                    : `HTTP エラー: ${response.status} ${response.statusText}`;
             }
             throw new Error(errorMessage);
         }
 
-        console.log(response)
         // 成功响应处理
         return await response.json();
 
     } catch (error) {
-        console.error('BatchList API Error:', error);
+        console.error('OldList API Error:', error);
         throw error;
     }
 };
 
 
 /**
- * 封装的删除批次项目 API 调用
- * @param id 要删除的批次项目 ID
+ * 删除 Old 配置项目
  */
-export const deleteBatchItemApi = async (id: number): Promise<void> => {
+export const deleteOldItemApi = async (id: number): Promise<void> => {
 
     const token = getAuthToken();
     if (!token) {
         throw new Error('認証トークンが見つかりません。再ログインしてください。');
     }
 
-    const url = `${BASE_API_URL}/${id}`; // 构造带 ID 的删除 URL
+    const url = `${BASE_API_OLD_URL}/${id}`; // 构造带 ID 的删除 URL
 
     try {
         const response = await fetch(url, {
-            method: 'DELETE', // 使用 DELETE 方法
+            method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`, // Bearer Token 认证
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
         });
@@ -356,30 +355,23 @@ export const deleteBatchItemApi = async (id: number): Promise<void> => {
 
         if (!response.ok) {
 
-            // 特殊处理 401 认证失败
             if (response.status === 401) {
                 throw new Error('認証失敗またはトークン期限切れです。再ログインしてください。');
             }
+            if (response.status === 404) {
+                throw new Error(`Old configuration with ID ${id} not found`);
+            }
 
-            // 处理其他 HTTP 错误
             let errorMessage = defaultErrorMessage;
             const clonedResponse = response.clone();
 
             try {
                 const errorData = await clonedResponse.json();
-                if (errorData.detail) {
-                    errorMessage = errorData.detail;
-                } else if (errorData.message) {
-                    errorMessage = errorData.message;
-                } else {
-                    errorMessage = defaultErrorMessage;
-                }
+                errorMessage = errorData.detail || errorData.message || defaultErrorMessage;
             } catch (e) {
-                if (response.status >= 400 && response.status < 600) {
-                    errorMessage = `${defaultErrorMessage} (HTTP Status: ${response.status})`;
-                } else {
-                    errorMessage = `HTTP エラー: ${response.status} ${response.statusText}`;
-                }
+                errorMessage = (response.status >= 400 && response.status < 600)
+                    ? `${defaultErrorMessage} (HTTP Status: ${response.status})`
+                    : `HTTP エラー: ${response.status} ${response.statusText}`;
             }
 
             throw new Error(errorMessage);
@@ -387,7 +379,7 @@ export const deleteBatchItemApi = async (id: number): Promise<void> => {
 
         // 成功删除，不返回内容
     } catch (error) {
-        console.error('Delete Batch Item API Error:', error);
+        console.error('Delete Old Item API Error:', error);
         throw error;
     }
 };

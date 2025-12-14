@@ -27,7 +27,7 @@ const BatchCreate: React.FC = () => {
             message.success({ content: `新規バッチタスク (ID: ${result.id}) を作成しました！`, key: 'create', duration: 3 });
 
             // 成功后，跳转回列表页或重置表单
-            navigate('/batchList'); // 假设列表页路由是 /batch-list
+            form.resetFields(); // 假设列表页路由是 /batch-list
 
         } catch (error) {
             console.error('Create Error:', error);
