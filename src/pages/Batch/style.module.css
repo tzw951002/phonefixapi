@@ -2,17 +2,18 @@
 
 /* --- 全局容器 --- */
 .clean-dashboard-container {
-    /* 移除 padding，让 Layout 撑满全屏 */
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* --- 侧边栏样式 (Sider) --- */
+/* 保持侧边栏为浅色，以增加与深色背景的对比度 */
 .custom-sider {
-    border-right: 1px solid #f0f0f0;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.02);
+    border-right: 1px solid #3c4957; /* 调整分隔线颜色 */
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2); /* 增加阴影深度 */
     position: relative;
     z-index: 10;
+    background: #ffffff; /* 保持白色背景 */
 }
 
 /* 侧边栏头部 (按钮 + 标题) */
@@ -20,10 +21,10 @@
     height: 64px;
     display: flex;
     align-items: center;
-    padding-left: 18px; /* 对齐 */
+    padding-left: 18px;
     border-bottom: 1px solid #f0f0f0;
     background: #ffffff;
-    overflow: hidden; /* 防止文字折叠时溢出 */
+    overflow: hidden;
     white-space: nowrap;
 }
 
@@ -68,17 +69,18 @@
 }
 
 
-/* --- 主要内容区域背景 --- */
+/* --- 主要内容区域背景 (调整为深色) --- */
 .site-layout {
-    background: #f4f6f9 !important; /* 浅灰色背景 */
+    background: #2c3e50 !important; /* 深蓝色/深灰色背景 */
+    /* background: #2f3640 !important;  备选深色 */
 }
 
-/* --- 白色面板 --- */
+/* --- 白色面板 (保持或微调，以在深色背景下突出) --- */
 .clean-panel {
     background: #ffffff;
     padding: 24px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); /* 更柔和的阴影 */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* 调整阴影适应深色背景 */
 }
 
 /* --- 标题 --- */
@@ -88,7 +90,7 @@
     font-weight: 700;
     margin-bottom: 24px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #eaeaea;
+    border-bottom: 1px solid #ccc; /* 标题下划线加深 */
     display: flex;
     align-items: center;
     gap: 10px;
@@ -98,9 +100,9 @@
 .clean-search-form {
     margin-bottom: 24px;
     padding: 20px;
-    background: #fcfcfc; /* 极淡的灰色背景区分搜索区 */
+    background: #f4f6f9; /* 搜索区背景微调 */
     border-radius: 6px;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #ddd; /* 搜索区边框加深 */
 }
 
 .clean-input-small {
@@ -108,8 +110,7 @@
     border-radius: 4px;
 }
 
-/* --- 按钮美化 --- */
-
+/* --- 按钮美化 (保持不变) --- */
 /* 搜索按钮 */
 .clean-button-search {
     background: #007bff !important;
@@ -157,20 +158,27 @@
     box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
 }
 
-/* --- 表格样式 --- */
+/* --- 表格样式 (加深边框) --- */
+/* 表头 */
 .clean-table :global(.ant-table-thead > tr > th) {
-    background: #f8fafc !important;
-    color: #475569 !important;
+    background: #eef1f5 !important; /* 保持浅色表头，但略微加深 */
+    color: #2c3e50 !important; /* 字体颜色加深 */
     font-weight: 600;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #aebac9; /* 表头和主体之间的边框加深 */
 }
 
+/* 表格所有单元格边框 */
 .clean-table :global(.ant-table-tbody > tr > td) {
-    padding: 12px 16px; /* 增加舒适度 */
+    padding: 12px 16px;
+    border-bottom: 1px solid #dcdcdc; /* 行分隔线加深 */
+}
+
+.clean-table :global(.ant-table-wrapper table) {
+    border: 1px solid #dcdcdc; /* 整个表格外边框加深 */
 }
 
 .clean-table :global(.ant-table-tbody > tr:hover > td) {
-    background: #f1f5f9 !important; /* 悬停颜色 */
+    background: #f7f7f7 !important; /* 悬停颜色微调 */
 }
 
 /* 操作链接 */

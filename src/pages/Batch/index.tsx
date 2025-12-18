@@ -159,28 +159,42 @@ const BatchList: React.FC = () => {
 
     // 💡 使用 useMemo 动态生成 columns
     const columns: TableProps<UnifiedItem>['columns'] = useMemo(() => {
+        // 1. 基础共有列（无论新品还是中古都显示的字段）
         const baseColumns: ColumnType<UnifiedItem>[] = [
             { title: '商品名', dataIndex: 'good_name', key: 'good_name', width: 180 },
             { title: 'Makeshop独自商品コード', dataIndex: 'makeshop_identifier', key: 'makeshop_identifier', width: 150 },
             { title: '価格.com商品ID', dataIndex: 'kakaku_product_id', key: 'kakaku_product_id', width: 150 },
         ];
 
+        // 2. 中古特有列：状态、欠品、SN + コメント (仅中古显示)
         const oldSpecificColumns: ColumnType<UnifiedItem>[] = [
-            // ⬇️ 新增的字段，只在 'used' 模式下显示 ⬇️
             { title: '状態', dataIndex: 'good_status', key: 'good_status', width: 120, render: (t) => t || '-' },
             { title: '欠品', dataIndex: 'missing_info', key: 'missing_info', width: 150, render: (t) => t || '-' },
+            { title: '附属品', dataIndex: 'accessories_info', key: 'accessories_info', width: 150, render: (t) => t || '-' },
             { title: 'SN', dataIndex: 'serial_number', key: 'serial_number', width: 150, render: (t) => t || '-' },
+            {
+                title: 'コメント',
+                dataIndex: 'detail_comment',
+                key: 'detail_comment',
+                width: 200,
+                ellipsis: true, // 防止备注过长撑破表格
+                render: (t) => t || '-'
+            },
         ];
 
-        const commonColumns: ColumnType<UnifiedItem>[] = [
+        // 3. 新品特有列：順位、閾値 (仅新品显示)
+        const newSpecificColumns: ColumnType<UnifiedItem>[] = [
             { title: '順位', dataIndex: 'batch_type', width: 100, render: (t) => getBatchTypeText(t) },
             { title: '閾値', dataIndex: 'min_price_threshold', width: 120, align: 'right', render: (p) => p ? `${p.toLocaleString()} 円` : '-' },
+        ];
+
+        // 4. 结尾共有列：有效状态、操作按钮
+        const commonEndColumns: ColumnType<UnifiedItem>[] = [
             { title: '有効', dataIndex: 'is_enabled', width: 80, align: 'center', render: (e) => <Tag color={e ? 'green' : 'red'}>{e ? '有効' : '無効'}</Tag> },
             {
                 title: '操作', key: 'action', width: 150, fixed: 'right',
                 render: (_, record) => (
                     <Space>
-                        {/* 编辑跳转逻辑，根据 activeKey 调整路径 */}
                         <Button
                             type="link"
                             size="small"
@@ -196,13 +210,15 @@ const BatchList: React.FC = () => {
             },
         ];
 
-        // 拼接列：如果 activeKey 是 'used'，则包含 Old 特有列
-        const combinedColumns = activeKey === 'used'
-            ? [...baseColumns, ...oldSpecificColumns, ...commonColumns]
-            : [...baseColumns, ...commonColumns];
-
-        return combinedColumns;
-    }, [activeKey, navigate]); // 依赖 activeKey 变化和 navigate 函数
+        // 💡 核心逻辑：根据 activeKey 严格分发列
+        if (activeKey === 'used') {
+            // 中古：基础 + 中古特有(含备注) + 结尾
+            return [...baseColumns, ...oldSpecificColumns, ...commonEndColumns];
+        } else {
+            // 新品：基础 + 新品特有(顺位/阈值) + 结尾
+            return [...baseColumns, ...newSpecificColumns, ...commonEndColumns];
+        }
+    }, [activeKey, navigate]);// 依赖 activeKey 变化和 navigate 函数
 
     // 💡 动态决定跳转路径
     const createPath = activeKey === 'new' ? '/batchCreate' : '/oldCreate';
@@ -294,7 +310,7 @@ const BatchList: React.FC = () => {
                                 dataSource={data}
                                 rowKey="id"
                                 loading={loading}
-                                pagination={{ pageSize: 10 }}
+                                pagination={false}
                                 scroll={{ x: scrollX }} // 使用动态滚动宽度
                             />
                         </div>
