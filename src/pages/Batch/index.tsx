@@ -171,7 +171,7 @@ const BatchList: React.FC = () => {
             { title: '状態', dataIndex: 'good_status', key: 'good_status', width: 120, render: (t) => t || '-' },
             { title: '欠品', dataIndex: 'missing_info', key: 'missing_info', width: 150, render: (t) => t || '-' },
             { title: '附属品', dataIndex: 'accessories_info', key: 'accessories_info', width: 150, render: (t) => t || '-' },
-            { title: 'SN', dataIndex: 'serial_number', key: 'serial_number', width: 150, render: (t) => t || '-' },
+            { title: '製造番号', dataIndex: 'serial_number', key: 'serial_number', width: 150, render: (t) => t || '-' },
             {
                 title: 'コメント',
                 dataIndex: 'detail_comment',

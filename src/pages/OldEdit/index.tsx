@@ -191,15 +191,17 @@ const OldEdit: React.FC = () => {
                     <h3 className={styles['clean-subtitle']}>商品詳細情報</h3>
 
                     <Form.Item
-                        label={<span className={styles['clean-label']}>商品状態</span>}
+                        label={<span className={styles['clean-label']}>商品状態(数字で入力してください。 1:Sランク 2:Aランク 3:Bランク 4:Cランク)</span>}
                         name="good_status"
+                        rules={[{ required: true, message: '商品状態を入力してください' }]}
                     >
-                        <Input className={styles['clean-input']} placeholder="中古美品、新品未開封 等" />
+                        <Input className={styles['clean-input']} placeholder="1" />
                     </Form.Item>
 
                     <Form.Item
                         label={<span className={styles['clean-label']}>欠品情報 (缺失配件)</span>}
                         name="missing_info"
+                        rules={[{ required: true, message: '欠品情報を入力してください' }]}
                     >
                         <Input className={styles['clean-input']} placeholder="充電器なし、説明書欠品 等" />
                     </Form.Item>
@@ -207,6 +209,7 @@ const OldEdit: React.FC = () => {
                     <Form.Item
                         label={<span className={styles['clean-label']}>附属品情報 (包含配件)</span>}
                         name="accessories_info"
+                        rules={[{ required: true, message: '附属品情報を入力してください' }]}
                     >
                         <Input className={styles['clean-input']} placeholder="元箱あり、SDカード付き 等" />
                     </Form.Item>
@@ -214,13 +217,15 @@ const OldEdit: React.FC = () => {
                     <Form.Item
                         label={<span className={styles['clean-label']}>製造番号 / 序列号</span>}
                         name="serial_number"
+                        rules={[{ required: true, message: '製造番号を入力してください' }]}
                     >
                         <Input className={styles['clean-input']} placeholder="SN1234567890" />
                     </Form.Item>
 
                     <Form.Item
-                        label={<span className={styles['clean-label']}>詳細コメント (备注)</span>}
+                        label={<span className={styles['clean-label']}>価格COM表示コメント</span>}
                         name="detail_comment"
+                        rules={[{ required: true, message: '価格COM表示コメントを入力してください' }]}
                     >
                         <TextArea
                             className={styles['clean-input']}
