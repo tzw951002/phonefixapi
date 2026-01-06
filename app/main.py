@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # 👈 导入 CORS 中间件
-from app.api import user, batch, old
+from app.api import user
 
 
 app = FastAPI()
@@ -25,7 +25,5 @@ app.add_middleware(
 #    但您的 prefix 是 `/user`，如果前端使用 `/users`，请确保这里匹配。
 #    如果前端确实是 `/users`，您可能需要将 prefix 改为 `/users`
 app.include_router(user.router, prefix="/user", tags=["user"])
-app.include_router(batch.router, prefix="/batch", tags=["batch"])
-app.include_router(old.router, prefix="/old", tags=["old"])
 
 
