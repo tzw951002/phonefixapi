@@ -1,127 +1,96 @@
-/* 移除 @keyframes flow-lines 及其相关的 .dynamic-lines-background 样式 */
-
-/* --- 容器和背景样式：高对比度、清爽的浅色背景 --- */
-
+/* --- 容器：使用柔和的米白色背景 --- */
 .clean-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    /* 清爽的浅色背景：白色或极浅的灰色 */
-    background: #f7f9fc;
+    background: #FDFBF7; /* 原木风背景色 */
     position: relative;
     overflow: hidden;
-    /* 保持易读的字体，可以改为更现代的无衬线字体 */
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
 }
 
-/* --- 表单面板样式：清晰边界，轻量阴影 --- */
-
+/* --- 表单面板：增加质感，使用更柔和的边框 --- */
 .clean-form-panel {
     width: 380px;
-    padding: 30px;
-    background: #ffffff; /* 纯白色面板 */
-    /* 使用深色边框或非常轻的阴影来定义边界 */
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    /* 轻微的阴影，不使用发光 */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 40px 30px;
+    background: #ffffff;
+    border: 1px solid #EADDCA; /* 浅木色边框 */
+    border-radius: 12px; /* 更圆润的角 */
+    box-shadow: 0 10px 25px rgba(166, 124, 82, 0.08); /* 带有暖色调的投影 */
     position: relative;
     z-index: 10;
-    transition: all 0.3s ease;
 }
 
-/* --- 标题样式：深色、简洁 --- */
-
+/* --- 标题：深咖啡色，体现稳重感 --- */
 .clean-title {
-    color: #333333; /* 深色标题 */
+    color: #5D4037;
     text-align: center;
-    margin-bottom: 25px;
-    font-size: 1.6rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-shadow: none; /* 移除发光 */
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
-/* --- 标签和输入框样式：高对比度、清晰 --- */
-
+/* --- 标签：中性灰褐色 --- */
 .clean-label {
-    color: #555555 !important; /* 较深的标签颜色 */
-    font-weight: 500;
-    font-size: 0.9rem;
-    /* 移除大写 */
-    text-transform: none;
+    color: #8B7E74 !important;
+    font-weight: 600;
+    font-size: 0.85rem;
 }
 
+/* --- 输入框样式：去掉蓝色，改用暖色调 --- */
 .clean-input.ant-input,
 .clean-input.ant-input-password {
     background: #ffffff !important;
-    /* 高对比度边框：细且颜色适中 */
-    border: 1px solid #cccccc !important;
-    color: #333333 !important; /* 深色输入文字 */
-    box-shadow: none; /* 移除阴影 */
+    border: 1px solid #EADDCA !important;
+    color: #5D4037 !important;
     transition: all 0.3s;
-    height: 40px;
-    border-radius: 4px;
+    height: 44px;
+    border-radius: 8px;
 }
 
+/* 聚焦时变为胡桃木色 */
 .clean-input.ant-input:focus,
-.clean-input.ant-input-password:focus,
+.clean-input:global(.ant-input-affix-wrapper-focused) {
+    border-color: #A67C52 !important;
+    box-shadow: 0 0 0 2px rgba(166, 124, 82, 0.1) !important;
+}
+
 .clean-input.ant-input:hover,
-.clean-input.ant-input-password:hover {
-    /* Focus/Hover 时使用醒目的强调色（如亮蓝色 #007bff） */
-    border-color: #007bff !important;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2) !important; /* 轻微的聚焦环 */
+.clean-input:global(.ant-input-affix-wrapper:hover) {
+    border-color: #A67C52 !important;
 }
 
-.clean-input::placeholder {
-    color: #999999 !important;
-    opacity: 1;
-}
-
-
-/* --- 按钮样式：强调色、高对比度 --- */
-
+/* --- 按钮样式：使用森林绿，呼应 LINE 咨询色 --- */
 .clean-item-button {
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
 .clean-button.ant-btn-primary {
-    /* 强调色：深海军蓝，与背景形成高对比度 */
-    background: #007bff !important;
-    border-color: #007bff !important;
+    background: #4A6741 !important; /* 森林绿 */
+    border-color: #4A6741 !important;
     color: #ffffff !important;
     font-weight: 600;
-    letter-spacing: 0;
-    text-shadow: none;
-    transition: all 0.3s;
-    height: 45px;
-    border-radius: 4px;
+    height: 48px;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-shadow: 0 4px 10px rgba(74, 103, 65, 0.2) !important;
 }
 
-.clean-button.ant-btn-primary:hover,
-.clean-button.ant-btn-primary:focus {
-    /* 稍深的颜色作为 Hover 状态，保持简洁 */
-    background: #0056b3 !important;
-    border-color: #0056b3 !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4) !important;
-    transform: none; /* 移除缩放 */
+.clean-button.ant-btn-primary:hover {
+    background: #3d5435 !important;
+    border-color: #3d5435 !important;
+    transform: translateY(-1px);
 }
 
-/* --- 额外装饰文本：低调提示 --- */
-
-.clean-footer-text {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 0.8rem;
-    color: #777777;
-    /* 简洁的分隔线 */
-    border-top: 1px solid #eeeeee;
-    padding-top: 15px;
+.clean-button.ant-btn-primary:active {
+    transform: translateY(0);
 }
 
-/* 确保 AntD 错误信息可见 */
+/* --- 错误提示文字颜色优化 --- */
 :global(.ant-form-item-explain-error) {
-    color: #ff4d4f !important;
+    color: #B36D61 !important; /* 柔和的砖红色错误提示 */
+    font-size: 12px;
+    margin-top: 4px;
 }

@@ -18,7 +18,7 @@ const Login: React.FC = () => {
             // 💡 关键修改 2: 使用 messageApi 实例代替全局 message
             messageApi.success('ログイン成功しました');
             localStorage.setItem('authToken', res.token);
-            navigate('/batchList');
+            navigate('/home');
         } catch (err: any) {
             // 💡 关键修改 3: 使用 messageApi 实例代替全局 message
             messageApi.error(err.message || 'ログインに失敗しました');
@@ -37,7 +37,7 @@ const Login: React.FC = () => {
                 className={styles['clean-form-panel']}
                 layout="vertical"
             >
-                <h2 className={styles['clean-title']}>価格.com連携管理</h2>
+                <h2 className={styles['clean-title']}>マスドク管理システム</h2>
 
                 <Form.Item
                     label={<span className={styles['clean-label']}>ユーザID</span>}

@@ -1,0 +1,39 @@
+.layoutContainer {
+    min-height: 100vh;
+}
+
+/* 侧边栏 Logo 区域 */
+.logoSection {
+    height: 64px;
+    margin: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.logoImage {
+    height: 32px;
+    width: auto;
+    object-contain: contain;
+}
+
+/* 头部导航条 */
+.header {
+    padding: 0 24px 0 0;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* 内容展示区域 */
+.contentArea {
+    margin: 24px 16px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 8px;
+    min-height: 280px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
