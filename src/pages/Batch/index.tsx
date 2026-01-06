@@ -184,8 +184,9 @@ const BatchList: React.FC = () => {
 
         // 3. 新品特有列：順位、閾値 (仅新品显示)
         const newSpecificColumns: ColumnType<UnifiedItem>[] = [
+            { title: 'JANコード', dataIndex: 'jancode', key: 'jancode', width: 140, render: (t) => t || '-' },
             { title: '順位', dataIndex: 'batch_type', width: 100, render: (t) => getBatchTypeText(t) },
-            { title: '閾値', dataIndex: 'min_price_threshold', width: 120, align: 'right', render: (p) => p ? `${p.toLocaleString()} 円` : '-' },
+            { title: '閾値', dataIndex: 'min_price_threshold', width: 120, align: 'right', render: (p) => p ? `${p.toLocaleString()} 円` : '-' }
         ];
 
         // 4. 结尾共有列：有效状态、操作按钮

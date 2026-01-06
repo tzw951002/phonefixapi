@@ -15,6 +15,7 @@ export interface BatchItem {
     good_name: string;
     makeshop_identifier: string;
     kakaku_product_id: string;
+    jancode?: string;
     batch_type: BatchType; // 👈 统一使用 1 | 2 | 3 | 4
     is_enabled: boolean;
     min_price_threshold: number | null;
@@ -32,6 +33,7 @@ export interface BatchCreateData {
     good_name: string;
     makeshop_identifier: string;
     kakaku_product_id: string;
+    jancode?: string;
     batch_type: BatchType; // 👈 统一使用 1 | 2 | 3 | 4
     is_enabled: boolean;
     min_price_threshold: number | null;
