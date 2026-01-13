@@ -5,7 +5,8 @@ from app.models.categories import CategoryCreate
 from app.models.news import NewsCreate
 from app.models.repair_prices import RepairPriceCreate
 from app.models.repair_types import RepairTypeCreate
-from .database.models import DBUser, DBNews, DBCategory, DBRepairType, DBRepairPrice
+from app.models.faq import FAQCreate
+from .database.models import DBUser, DBNews, DBCategory, DBRepairType, DBRepairPrice, DBFaq
 from typing import Optional, List
 import datetime
 
@@ -203,3 +204,48 @@ def update_repair_price(db: Session, price_id: int, price_in: RepairPriceCreate)
         db.commit()
         db.refresh(db_price)
     return db_price
+
+def get_all_faqs(db: Session) -> List[DBFaq]:
+    """
+    获取所有 FAQ，按权重 sort_order 降序排列（权重大的在前）
+    """
+    stmt = select(DBFaq).order_by(DBFaq.sort_order.desc(), DBFaq.id.desc())
+    return db.scalars(stmt).all()
+
+
+def create_faq(db: Session, faq_in: FAQCreate) -> DBFaq:
+    """
+    新增 FAQ 记录
+    """
+    db_faq = DBFaq(**faq_in.model_dump())
+    db.add(db_faq)
+    db.commit()
+    db.refresh(db_faq)
+    return db_faq
+
+
+def update_faq(db: Session, faq_id: int, faq_in: FAQCreate) -> DBFaq:
+    """
+    更新 FAQ 记录（支持全量更新及排序权重更新）
+    """
+    db_faq = db.get(DBFaq, faq_id)
+    if db_faq:
+        # 使用 exclude_unset=True 可以灵活处理只更新 sort_order 的场景
+        update_data = faq_in.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(db_faq, key, value)
+
+        db.commit()
+        db.refresh(db_faq)
+    return db_faq
+
+
+def delete_faq(db: Session, faq_id: int):
+    """
+    删除 FAQ 记录
+    """
+    db_faq = db.get(DBFaq, faq_id)
+    if db_faq:
+        db.delete(db_faq)
+        db.commit()
+    return db_faq

@@ -72,7 +72,7 @@ class DBRepairPrice(Base):
     is_visible = Column(Boolean, default=True)
 
     # --- 新增字段 ---
-    sort_order = Column(Integer, default=0, nullable=False) # 权重值，越大越靠前
+    sort_order = Column(Integer, default=0, nullable=False)  # 权重值，越大越靠前
     # ----------------
 
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -82,3 +82,17 @@ class DBRepairPrice(Base):
 
     def __repr__(self):
         return f"<DBRepairPrice(model='{self.model_name}', sort={self.sort_order})>"
+
+
+class DBFaq(Base):
+    __tablename__ = "faqs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(Text, nullable=False)  # 对应 SQL 中的 text
+    content = Column(Text, nullable=False) # 对应 SQL 中的 text
+    sort_order = Column(Integer, default=0)
+    is_visible = Column(Boolean, default=True) # SQL 中 tinyint(1) 对应 Boolean
+    created_at = Column(DateTime, server_default=func.now())
+
+    def __repr__(self):
+        return f"<DBFaq(id={self.id}, title='{self.title[:20]}...', sort={self.sort_order})>"

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # 👈 导入 CORS 中间件
-from app.api import user,news,price,category
+from app.api import user, news, price, category, faq
 
 
 app = FastAPI()
@@ -28,5 +28,6 @@ app.include_router(user.router, prefix="/user", tags=["user"])
 app.include_router(news.router, prefix="/news", tags=["news"])
 app.include_router(category.router, prefix="/categories", tags=["categories"])
 app.include_router(price.router, prefix="/prices", tags=["prices"])
+app.include_router(faq.router, prefix="/faq", tags=["faq"])
 
 
