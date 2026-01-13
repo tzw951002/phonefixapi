@@ -95,27 +95,36 @@ def create_repair_type(db: Session, rt_in: RepairTypeCreate) -> DBRepairType:
 def get_prices_by_filter(db: Session, category_id: int, repair_type_id: int) -> List[DBRepairPrice]:
     """
     对应 PriceManager 顶部的联动筛选功能
+    修改点：将原有的按价格降序改为先按 sort_order 降序，再按 id 降序
     """
-    stmt = select(DBRepairPrice).where(
-        DBRepairPrice.category_id == category_id,
-        DBRepairPrice.repair_type_id == repair_type_id
-    ).order_by(DBRepairPrice.price.desc())
+    stmt = (
+        select(DBRepairPrice)
+        .where(
+            DBRepairPrice.category_id == category_id,
+            DBRepairPrice.repair_type_id == repair_type_id
+        )
+        # 排序逻辑：权重大的在前，同权重下最新的在前
+        .order_by(DBRepairPrice.sort_order.desc(), DBRepairPrice.id.desc())
+    )
     return db.scalars(stmt).all()
 
 
 def upsert_repair_price(db: Session, price_in: RepairPriceCreate, price_id: Optional[int] = None) -> DBRepairPrice:
     """
-    新增或更新价格记录
+    新增或更新价格记录（支持 sort_order）
     """
+    # 将模型转为字典
+    price_data = price_in.model_dump()
+
     if price_id:
         # 更新逻辑
-        stmt = update(DBRepairPrice).where(DBRepairPrice.id == price_id).values(**price_in.model_dump())
+        stmt = update(DBRepairPrice).where(DBRepairPrice.id == price_id).values(**price_data)
         db.execute(stmt)
         db.commit()
         return db.get(DBRepairPrice, price_id)
     else:
         # 新增逻辑
-        db_price = DBRepairPrice(**price_in.model_dump())
+        db_price = DBRepairPrice(**price_data)
         db.add(db_price)
         db.commit()
         db.refresh(db_price)
@@ -177,15 +186,19 @@ def update_repair_type(db: Session, rt_id: int, rt_in: RepairTypeCreate) -> DBRe
 # 4. 更新维修价格 (RepairPrice)
 # -----------------------------------------------------
 def update_repair_price(db: Session, price_id: int, price_in: RepairPriceCreate) -> DBRepairPrice:
+    """
+    显式更新维修价格（支持 sort_order）
+    """
     db_price = db.get(DBRepairPrice, price_id)
     if db_price:
+        # exclude_unset=True 确保只更新请求中存在的字段（如只更新排序权重）
         update_data = price_in.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(db_price, key, value)
 
-        # 记录更新时间（如果模型中有此字段）
-        if hasattr(db_price, 'updated_at'):
-            db_price.updated_at = datetime.datetime.now()
+        # SQLAlchemy 的 onupdate=func.now() 会自动处理时间，
+        # 但如果想手动强制刷新 updated_at，保留此行：
+        db_price.updated_at = datetime.datetime.now()
 
         db.commit()
         db.refresh(db_price)

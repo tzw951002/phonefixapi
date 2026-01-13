@@ -13,7 +13,7 @@ class RepairPriceBase(BaseModel):
     price: float = Field(..., example=24800.0)
     price_suffix: str = Field("税込", max_length=20, example="税込")
     is_visible: bool = Field(True, example=True)
-
+    sort_order: int = Field(0, description="排序权重，数值越大越靠前", example=10)
 
 class RepairPriceCreate(RepairPriceBase):
     """用于接收创建价格的请求"""
