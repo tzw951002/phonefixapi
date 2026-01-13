@@ -6,9 +6,11 @@ from app.models.news import NewsCreate
 from app.models.repair_prices import RepairPriceCreate
 from app.models.repair_types import RepairTypeCreate
 from app.models.faq import FAQCreate
-from .database.models import DBUser, DBNews, DBCategory, DBRepairType, DBRepairPrice, DBFaq
+from .database.models import DBUser, DBNews, DBCategory, DBRepairType, DBRepairPrice, DBFaq, DBSiteConfig
 from typing import Optional, List
 import datetime
+
+from .models.config import SiteConfigBase
 
 
 # -----------------------------------------------------
@@ -205,6 +207,7 @@ def update_repair_price(db: Session, price_id: int, price_in: RepairPriceCreate)
         db.refresh(db_price)
     return db_price
 
+
 def get_all_faqs(db: Session) -> List[DBFaq]:
     """
     获取所有 FAQ，按权重 sort_order 降序排列（权重大的在前）
@@ -249,3 +252,25 @@ def delete_faq(db: Session, faq_id: int):
         db.delete(db_faq)
         db.commit()
     return db_faq
+
+
+def get_site_config(db: Session) -> DBSiteConfig:
+    # 默认获取第一条记录
+    config = db.query(DBSiteConfig).filter(DBSiteConfig.id == 1).first()
+    if not config:
+        # 如果不存在则初始化一条空数据
+        config = DBSiteConfig(id=1, hero_title="", hero_content="")
+        db.add(config)
+        db.commit()
+        db.refresh(config)
+    return config
+
+
+def update_site_config(db: Session, config_in: SiteConfigBase) -> DBSiteConfig:
+    db_config = get_site_config(db)
+    update_data = config_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_config, key, value)
+    db.commit()
+    db.refresh(db_config)
+    return db_config

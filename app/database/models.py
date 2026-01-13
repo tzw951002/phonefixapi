@@ -89,10 +89,34 @@ class DBFaq(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(Text, nullable=False)  # 对应 SQL 中的 text
-    content = Column(Text, nullable=False) # 对应 SQL 中的 text
+    content = Column(Text, nullable=False)  # 对应 SQL 中的 text
     sort_order = Column(Integer, default=0)
-    is_visible = Column(Boolean, default=True) # SQL 中 tinyint(1) 对应 Boolean
+    is_visible = Column(Boolean, default=True)  # SQL 中 tinyint(1) 对应 Boolean
     created_at = Column(DateTime, server_default=func.now())
 
     def __repr__(self):
         return f"<DBFaq(id={self.id}, title='{self.title[:20]}...', sort={self.sort_order})>"
+
+
+class DBSiteConfig(Base):
+    __tablename__ = "site_configs"
+
+    # 固定为 1 的主键，因为全站只有一份配置
+    id = Column(Integer, primary_key=True, default=1)
+
+    # HERO 模块
+    hero_title = Column(Text, nullable=False)  # HERO大标题
+    hero_content = Column(Text, nullable=False)  # HERO内容描述（支持换行）
+    hero_image_url = Column(String(500))  # HERO背景图链接
+    hero_video_url = Column(String(500))  # HERO视频链接
+
+    # 社交媒体
+    line_url = Column(String(500))  # LINE链接
+    x_url = Column(String(500))  # X (Twitter) 链接
+
+    # 公司信息
+    company_address = Column(Text)  # 公司地址
+    business_hours = Column(Text)  # 营业时间（支持换行）
+
+    def __repr__(self):
+        return f"<DBSiteConfig(id={self.id}, hero_title='{self.hero_title[:15]}...')>"
