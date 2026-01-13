@@ -8,7 +8,8 @@ import {
     NotificationOutlined,
     AppstoreAddOutlined,
     DollarOutlined,
-    LogoutOutlined
+    LogoutOutlined,
+    QuestionCircleOutlined, SettingOutlined // 导入 FAQ 图标
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,9 +17,10 @@ import { useNavigate } from 'react-router-dom';
 import NewsManager from './components/NewsManager';
 import CategoryManager from './components/CategoryManager';
 import PriceManager from './components/PriceManager';
-const { Header, Sider, Content } = Layout;
+import FaqManager from './components/FaqManager';
+import ConfigManager from "./components/ConfigManager"; // 1. 导入 FAQ 组件
 
-// --- 仅保留还没创建文件的占位组件 (如果还没写 PriceManager.tsx) ---
+const { Header, Sider, Content } = Layout;
 
 const Home: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
@@ -50,6 +52,7 @@ const Home: React.FC = () => {
             <Layout style={{ minHeight: '100vh' }}>
                 <Sider trigger={null} collapsible collapsed={collapsed} theme="light" style={{ borderRight: '1px solid #EADDCA' }}>
                     <div style={{ height: '64px', margin: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FDFBF7', borderRadius: '12px' }}>
+                        {/* 这里的 logo 路径请确保正确 */}
                         <img src="/logo.png" alt="logo" style={{ height: '32px', display: collapsed ? 'none' : 'block' }} />
                         {collapsed && <span style={{ color: '#4A6741', fontWeight: 'bold' }}>SD</span>}
                     </div>
@@ -61,6 +64,8 @@ const Home: React.FC = () => {
                             { key: 'news', icon: <NotificationOutlined />, label: '通知一覧管理' },
                             { key: 'categories', icon: <AppstoreAddOutlined />, label: '机种分类设置' },
                             { key: 'prices', icon: <DollarOutlined />, label: '维修价格编辑' },
+                            { key: 'faq', icon: <QuestionCircleOutlined />, label: 'よくあるご質問' }, // 2. 增加 FAQ 菜单
+                            { key: 'config', icon: <SettingOutlined />, label: '全站情报设置' }
                         ]}
                     />
                 </Sider>
@@ -73,6 +78,7 @@ const Home: React.FC = () => {
                             onClick={() => setCollapsed(!collapsed)}
                             style={{ fontSize: '18px', width: 64, height: 64 }}
                         />
+                        <div style={{ fontWeight: '500', color: '#8B7E74' }}>SmartDevice 维修管理后台</div>
                         <Button type="primary" ghost icon={<LogoutOutlined />} onClick={handleLogout}>ログアウト</Button>
                     </Header>
 
@@ -81,6 +87,8 @@ const Home: React.FC = () => {
                             {selectedKey === 'news' && <NewsManager />}
                             {selectedKey === 'categories' && <CategoryManager />}
                             {selectedKey === 'prices' && <PriceManager />}
+                            {selectedKey === 'faq' && <FaqManager />} {/* 3. 增加 FAQ 渲染逻辑 */}
+                            {selectedKey === 'config' && <ConfigManager />}
                         </div>
                     </Content>
                 </Layout>
