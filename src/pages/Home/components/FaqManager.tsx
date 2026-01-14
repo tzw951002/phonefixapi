@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Table, Button, Space, Modal, Form, Input, InputNumber, Popconfirm, message, Card, Empty, Tag } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SortDescendingOutlined, MenuOutlined } from '@ant-design/icons';
 
-// --- DnD Kit 拖拽相关 ---
+// --- DnD Kit 関連 ---
 import { DndContext, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -12,7 +12,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 import { API_BASE_URL } from "../../../config/api";
 
-// --- 1. 拖拽手柄组件 ---
+// --- 1. ドラッグハンドルコンポーネント ---
 const DragHandle = ({ id }: { id: number }) => {
     const { attributes, listeners, setNodeRef } = useSortable({ id: String(id) });
     return (
@@ -22,7 +22,7 @@ const DragHandle = ({ id }: { id: number }) => {
     );
 };
 
-// --- 2. 可拖拽行容器 ---
+// --- 2. ドラッグ可能行コンポーネント ---
 const EditableRow = (props: any) => {
     const { children, ...restProps } = props;
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -48,15 +48,17 @@ const FaqManager: React.FC = () => {
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-    // 获取 FAQ 列表
+    // FAQリスト取得
     const loadFaqs = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/faq/`); // 注意这里的 prefix 要和后端一致
+            const res = await fetch(`${API_BASE_URL}/faq/`);
             const data = await res.json();
-            setDataSource(Array.isArray(data) ? data : []);
+            // 初期表示は sort_order の昇順でソート
+            const sortedData = Array.isArray(data) ? data.sort((a, b) => a.sort_order - b.sort_order) : [];
+            setDataSource(sortedData);
         } catch (e) {
-            message.error("获取数据失败");
+            message.error("データの取得に失敗しました");
         } finally {
             setLoading(false);
         }
@@ -64,7 +66,7 @@ const FaqManager: React.FC = () => {
 
     useEffect(() => { loadFaqs(); }, []);
 
-    // --- 核心：拖拽后全量重排序号 ---
+    // --- ドラッグ終了ロジック (昇順ルールに修正) ---
     const onDragEnd = async ({ active, over }: DragEndEvent) => {
         if (!over || active.id === over.id) return;
 
@@ -73,14 +75,14 @@ const FaqManager: React.FC = () => {
 
         if (oldIndex !== -1 && newIndex !== -1) {
             const newData = arrayMove(dataSource, oldIndex, newIndex);
-            setDataSource(newData); // 立即更新 UI
+            setDataSource(newData); // UIを即時更新
 
             const token = localStorage.getItem('authToken');
-            const total = newData.length;
 
             try {
                 const promises = newData.map((item, index) => {
-                    const newSortOrder = (total - index) * 10;
+                    // ルール：上にあるほど数値が小さい (10, 20, 30...)
+                    const newSortOrder = (index + 1) * 10;
                     if (item.sort_order === newSortOrder) return Promise.resolve();
 
                     return fetch(`${API_BASE_URL}/faq/${item.id}`, {
@@ -90,9 +92,9 @@ const FaqManager: React.FC = () => {
                     });
                 });
                 await Promise.all(promises);
-                message.success("显示顺序已保存");
+                message.success("表示順を保存しました");
             } catch (e) {
-                message.error("排序同步失败");
+                message.error("並べ替えの同期に失敗しました");
                 loadFaqs();
             }
         }
@@ -100,14 +102,14 @@ const FaqManager: React.FC = () => {
 
     const columns = [
         {
-            title: '排序',
+            title: '移動',
             key: 'sort',
             width: 60,
             align: 'center' as const,
             render: (_: any, record: any) => <DragHandle id={record.id} />,
         },
         {
-            title: '标题 (问题)',
+            title: 'タイトル (質問)',
             dataIndex: 'title',
             key: 'title',
             width: '30%',
@@ -119,7 +121,7 @@ const FaqManager: React.FC = () => {
             key: 'content',
             render: (text: string) => (
                 <div style={{
-                    whiteSpace: 'pre-wrap', // 关键：在表格里显示换行预览
+                    whiteSpace: 'pre-wrap',
                     maxHeight: '100px',
                     overflowY: 'auto',
                     fontSize: '13px',
@@ -130,7 +132,7 @@ const FaqManager: React.FC = () => {
             )
         },
         {
-            title: '权重',
+            title: '表示順',
             dataIndex: 'sort_order',
             width: 80,
             render: (v: number) => <Tag color="orange">{v}</Tag>
@@ -141,9 +143,14 @@ const FaqManager: React.FC = () => {
             width: 150,
             render: (_: any, record: any) => (
                 <Space>
-                    <Button type="text" icon={<EditOutlined />} onClick={() => showModal(record)}>编辑</Button>
-                    <Popconfirm title="确定删除这条问答吗？" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="text" danger icon={<DeleteOutlined />}>删除</Button>
+                    <Button type="text" icon={<EditOutlined />} onClick={() => showModal(record)}>編集</Button>
+                    <Popconfirm
+                        title="この問答を削除してもよろしいですか？"
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="はい"
+                        cancelText="いいえ"
+                    >
+                        <Button type="text" danger icon={<DeleteOutlined />}>削除</Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -162,10 +169,10 @@ const FaqManager: React.FC = () => {
                 body: JSON.stringify(values)
             });
             if (!res.ok) throw new Error();
-            message.success('保存成功');
+            message.success('保存しました');
             setIsModalOpen(false);
             loadFaqs();
-        } catch (e) { message.error('保存失败'); } finally { setLoading(false); }
+        } catch (e) { message.error('保存に失敗しました'); } finally { setLoading(false); }
     };
 
     const handleDelete = async (id: number) => {
@@ -175,9 +182,9 @@ const FaqManager: React.FC = () => {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            message.success('删除成功');
+            message.success('削除しました');
             loadFaqs();
-        } catch (e) { message.error('删除失败'); }
+        } catch (e) { message.error('削除に失敗しました'); }
     };
 
     const showModal = (record: any = null) => {
@@ -186,7 +193,7 @@ const FaqManager: React.FC = () => {
             form.setFieldsValue(record);
         } else {
             form.resetFields();
-            form.setFieldsValue({ sort_order: 0, is_visible: true });
+            form.setFieldsValue({ sort_order: 0 });
         }
         setIsModalOpen(true);
     };
@@ -199,14 +206,14 @@ const FaqManager: React.FC = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#8B7E74' }}>よくあるご質問 (FAQ) 管理</div>
                     <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal()}>
-                        追加问题
+                        質問を追加
                     </Button>
                 </div>
             </Card>
 
             <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', border: '1px solid #EADDCA' }}>
                 <div style={{ marginBottom: 16, textAlign: 'right', color: '#faad14', fontSize: '12px' }}>
-                    <SortDescendingOutlined /> 拖动左侧图标可调整前台显示顺序
+                    <SortDescendingOutlined /> 左のアイコンをドラッグして表示順を調整できます（上ほど優先）
                 </div>
 
                 <DndContext sensors={sensors} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
@@ -218,25 +225,27 @@ const FaqManager: React.FC = () => {
                             columns={columns}
                             loading={loading}
                             pagination={false}
-                            locale={{ emptyText: <Empty description="暂无问答数据" /> }}
+                            locale={{ emptyText: <Empty description="FAQデータがありません" /> }}
                         />
                     </SortableContext>
                 </DndContext>
             </div>
 
             <Modal
-                title={editingRecord ? "编辑问答" : "新增问答"}
+                title={editingRecord ? "FAQ編集" : "新規FAQ追加"}
                 open={isModalOpen}
                 onOk={handleOk}
                 onCancel={() => setIsModalOpen(false)}
                 confirmLoading={loading}
                 width={700}
+                okText="保存"
+                cancelText="キャンセル"
             >
                 <Form form={form} layout="vertical" style={{ marginTop: 20 }}>
                     <Form.Item
                         name="title"
-                        label="问题标题 (Question)"
-                        rules={[{ required: true, message: '请输入问题标题' }]}
+                        label="質問内容 (Question)"
+                        rules={[{ required: true, message: '質問タイトルを入力してください' }]}
                     >
                         <Input placeholder="例：修理時間はどのくらいかかりますか？" />
                     </Form.Item>
@@ -244,16 +253,16 @@ const FaqManager: React.FC = () => {
                     <Form.Item
                         name="content"
                         label="回答内容 (Answer)"
-                        rules={[{ required: true, message: '请输入回答内容' }]}
+                        rules={[{ required: true, message: '回答内容を入力してください' }]}
                     >
                         <Input.TextArea
                             rows={6}
-                            placeholder="支持换行。直接按回车键输入即可。"
+                            placeholder="改行対応しています。"
                         />
                     </Form.Item>
 
-                    <Form.Item name="sort_order" label="排序权重">
-                        <InputNumber style={{ width: '100%' }} placeholder="数字越大越靠前" />
+                    <Form.Item name="sort_order" label="表示順ウェイト">
+                        <InputNumber style={{ width: '100%' }} placeholder="数値が小さいほど上位に表示されます" />
                     </Form.Item>
                 </Form>
             </Modal>
