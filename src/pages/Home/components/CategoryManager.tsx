@@ -25,7 +25,7 @@ const CategoryManager: React.FC = () => {
     const [editingRecord, setEditingRecord] = useState<any>(null);
 
     // -----------------------------------------------------
-    // 🔄 数据获取
+    // 🔄 データ取得
     // -----------------------------------------------------
     const loadData = async () => {
         setLoading(true);
@@ -36,7 +36,6 @@ const CategoryManager: React.FC = () => {
             ]);
 
             // 💡 关键防御逻辑：确保 catData 和 rtData 是数组
-            // 如果后端返回的是 { data: [...] }，请改为 catData.data
             setCategories(Array.isArray(catData) ? catData : []);
             setRepairTypes(Array.isArray(rtData) ? rtData : []);
 
@@ -76,23 +75,23 @@ const CategoryManager: React.FC = () => {
         setLoading(true);
         try {
             if (editingRecord) {
-                // 更新逻辑 - 匹配后端 /category/{id}
+                // 更新逻辑
                 const res = await fetch(`${API_BASE_URL}/categories/${editingRecord.id}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify(values)
                 });
                 if (!res.ok) throw new Error();
-                message.success('更新成功');
+                message.success('更新が完了しました');
             } else {
                 // 新增逻辑
                 await createCategoryApi(values);
-                message.success('追加成功');
+                message.success('追加が完了しました');
             }
             setIsCatModalOpen(false);
             loadData();
         } catch (e) {
-            message.error('操作失敗');
+            message.error('操作に失敗しました');
         } finally {
             setLoading(false);
         }
@@ -105,10 +104,10 @@ const CategoryManager: React.FC = () => {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            message.success('削除成功');
+            message.success('削除しました');
             loadData();
         } catch (e) {
-            message.error('削除失敗');
+            message.error('削除に失敗しました');
         }
     };
 
@@ -127,7 +126,6 @@ const CategoryManager: React.FC = () => {
         const token = getAuthToken();
         setLoading(true);
         try {
-            // 匹配后端 /category/repair-types
             const url = editingRecord
                 ? `${API_BASE_URL}/categories/repair-types/${editingRecord.id}`
                 : `${API_BASE_URL}/categories/repair-types`;
@@ -138,11 +136,11 @@ const CategoryManager: React.FC = () => {
                 body: JSON.stringify(values)
             });
             if (!res.ok) throw new Error();
-            message.success('保存成功');
+            message.success('保存しました');
             setIsRepairModalOpen(false);
             loadData();
         } catch (e) {
-            message.error('操作失敗');
+            message.error('操作に失敗しました');
         } finally {
             setLoading(false);
         }
@@ -151,7 +149,7 @@ const CategoryManager: React.FC = () => {
     // 表格列定义 (保持 UI 不变)
     const catColumns = [
         { title: '表示順', dataIndex: 'sort_order', key: 'sort_order', width: 80 },
-        { title: '机种分类名称', dataIndex: 'name', key: 'name', render: (text: string) => <Tag color="brown">{text}</Tag> },
+        { title: '機種カテゴリ名', dataIndex: 'name', key: 'name', render: (text: string) => <Tag color="brown">{text}</Tag> },
         {
             title: '操作',
             key: 'action',
@@ -169,7 +167,7 @@ const CategoryManager: React.FC = () => {
 
     const repairColumns = [
         { title: '表示順', dataIndex: 'sort_order', key: 'sort_order', width: 80 },
-        { title: '维修种类项目', dataIndex: 'name', key: 'name', render: (text: string) => <Tag color="green">{text}</Tag> },
+        { title: '修理項目名', dataIndex: 'name', key: 'name', render: (text: string) => <Tag color="green">{text}</Tag> },
         {
             title: '操作',
             key: 'action',
@@ -189,38 +187,38 @@ const CategoryManager: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', border: '1px solid #EADDCA' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                    <h3 style={{ color: '#5D4037', margin: 0 }}><SettingOutlined /> 一级目录：机种分类</h3>
-                    <Button type="primary" icon={<PlusOutlined />} onClick={() => showCatModal()}>分类追加</Button>
+                    <h3 style={{ color: '#5D4037', margin: 0 }}><SettingOutlined /> 第1階層：機種カテゴリ</h3>
+                    <Button type="primary" icon={<PlusOutlined />} onClick={() => showCatModal()}>カテゴリ追加</Button>
                 </div>
                 <Table dataSource={categories} columns={catColumns} rowKey="id" pagination={false} size="small" loading={loading} />
             </div>
 
             <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', border: '1px solid #EADDCA' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                    <h3 style={{ color: '#5D4037', margin: 0 }}><SettingOutlined /> 二级目录：维修项目</h3>
-                    <Button type="primary" icon={<PlusOutlined />} onClick={() => showRepairModal()}>项目追加</Button>
+                    <h3 style={{ color: '#5D4037', margin: 0 }}><SettingOutlined /> 第2階層：修理項目</h3>
+                    <Button type="primary" icon={<PlusOutlined />} onClick={() => showRepairModal()}>項目追加</Button>
                 </div>
                 <Table dataSource={repairTypes} columns={repairColumns} rowKey="id" pagination={false} size="small" loading={loading} />
             </div>
 
-            {/* 弹窗部分保持不变，仅增加 confirmLoading={loading} */}
-            <Modal title="机种分类编辑" open={isCatModalOpen} onOk={handleCatSubmit} onCancel={() => setIsCatModalOpen(false)} confirmLoading={loading}>
+            {/* 弹窗部分 */}
+            <Modal title="カテゴリ編集" open={isCatModalOpen} onOk={handleCatSubmit} onCancel={() => setIsCatModalOpen(false)} confirmLoading={loading} okText="保存" cancelText="キャンセル">
                 <Form form={form} layout="vertical" style={{ marginTop: 20 }}>
-                    <Form.Item name="name" label="分类名称" rules={[{ required: true }]}>
+                    <Form.Item name="name" label="カテゴリ名" rules={[{ required: true, message: 'カテゴリ名を入力してください' }]}>
                         <Input placeholder="例：iPhone" />
                     </Form.Item>
-                    <Form.Item name="sort_order" label="排序 (数字越小越靠前)">
+                    <Form.Item name="sort_order" label="表示順 (数値が小さいほど前)">
                         <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
                 </Form>
             </Modal>
 
-            <Modal title="维修项目编辑" open={isRepairModalOpen} onOk={handleRepairSubmit} onCancel={() => setIsRepairModalOpen(false)} confirmLoading={loading}>
+            <Modal title="修理項目編集" open={isRepairModalOpen} onOk={handleRepairSubmit} onCancel={() => setIsRepairModalOpen(false)} confirmLoading={loading} okText="保存" cancelText="キャンセル">
                 <Form form={form} layout="vertical" style={{ marginTop: 20 }}>
-                    <Form.Item name="name" label="项目名称" rules={[{ required: true }]}>
+                    <Form.Item name="name" label="項目名" rules={[{ required: true, message: '項目名を入力してください' }]}>
                         <Input placeholder="例：液晶修理(軽度)" />
                     </Form.Item>
-                    <Form.Item name="sort_order" label="排序">
+                    <Form.Item name="sort_order" label="表示順">
                         <InputNumber min={0} style={{ width: '100%' }} />
                     </Form.Item>
                 </Form>
