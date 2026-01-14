@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Table, Button, Space, Modal, Form, Input, InputNumber, Select, Popconfirm, message, Card, Empty, Tag } from 'antd';
+import { Table, Button, Space, Modal, Form, Input, InputNumber, Select, Popconfirm, message, Card, Tag } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SortDescendingOutlined, MenuOutlined } from '@ant-design/icons';
 
-// --- DnD Kit 相关 ---
+// --- DnD Kit 関連 ---
 import { DndContext, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -16,7 +16,7 @@ import { API_BASE_URL } from "../../../config/api";
 
 const { Option } = Select;
 
-// --- 1. 拖拽手柄组件 ---
+// --- 1. ドラッグハンドルコンポーネント ---
 const DragHandle = ({ id }: { id: number }) => {
     const { attributes, listeners, setNodeRef } = useSortable({ id: String(id) });
     return (
@@ -26,7 +26,7 @@ const DragHandle = ({ id }: { id: number }) => {
     );
 };
 
-// --- 2. 拖拽行组件 (修复了数据不显示的问题) ---
+// --- 2. ドラッグ可能行コンポーネント ---
 const EditableRow = (props: any) => {
     const { children, ...restProps } = props;
     const {
@@ -47,7 +47,6 @@ const EditableRow = (props: any) => {
         ...(isDragging ? { position: 'relative', zIndex: 9999, background: '#fafafa' } : {}),
     };
 
-    // 必须渲染 {children}，否则数据不会显示
     return (
         <tr {...restProps} ref={setNodeRef} style={style} {...attributes}>
             {children}
@@ -76,7 +75,7 @@ const PriceManager: React.FC = () => {
                 setCategories(cats); setRepairTypes(rts);
                 if (cats.length > 0) setSelectedCategory(cats[0].id);
                 if (rts.length > 0) setSelectedRepairType(rts[0].id);
-            } catch (e) { message.error("数据加载失败"); }
+            } catch (e) { message.error("データの読み込みに失敗しました"); }
         };
         initOptions();
     }, []);
@@ -93,7 +92,7 @@ const PriceManager: React.FC = () => {
 
     useEffect(() => { loadPrices(); }, [selectedCategory, selectedRepairType]);
 
-    // --- 拖拽结束逻辑：全量重排序号 ---
+    // --- ドラッグ終了ロジック ---
     const onDragEnd = async ({ active, over }: DragEndEvent) => {
         if (!over || active.id === over.id) return;
 
@@ -102,12 +101,11 @@ const PriceManager: React.FC = () => {
 
         if (oldIndex !== -1 && newIndex !== -1) {
             const newData = arrayMove(dataSource, oldIndex, newIndex);
-            setDataSource(newData); // 立即更新UI
+            setDataSource(newData);
 
             const token = localStorage.getItem('authToken');
             const total = newData.length;
             try {
-                // 遍历新数组，按位置分配 100, 90, 80... 的权重
                 const promises = newData.map((item, index) => {
                     const newSortOrder = (total - index) * 10;
                     if (item.sort_order === newSortOrder) return Promise.resolve();
@@ -118,9 +116,9 @@ const PriceManager: React.FC = () => {
                     });
                 });
                 await Promise.all(promises);
-                message.success("排序已更新");
+                message.success("並べ替え順を更新しました");
             } catch (e) {
-                message.error("排序保存失败");
+                message.error("並べ替え順の保存に失敗しました");
                 loadPrices();
             }
         }
@@ -128,24 +126,24 @@ const PriceManager: React.FC = () => {
 
     const columns = [
         {
-            title: '排序',
+            title: '移動',
             key: 'sort',
             width: 60,
             render: (_: any, record: any) => <DragHandle id={record.id} />,
         },
         {
-            title: '权重',
+            title: '表示順',
             dataIndex: 'sort_order',
             width: 80,
             render: (v: number) => <Tag color="blue">{v}</Tag>
         },
         {
-            title: '机种名',
+            title: '機種名',
             dataIndex: 'model_name',
             render: (text: string) => <span style={{ fontWeight: 'bold' }}>{text}</span>
         },
         {
-            title: '修理价格',
+            title: '修理料金',
             dataIndex: 'price',
             render: (price: number) => (
                 <span style={{ color: '#B36D61', fontWeight: 'bold' }}>
@@ -153,16 +151,16 @@ const PriceManager: React.FC = () => {
                 </span>
             )
         },
-        { title: '备注', dataIndex: 'price_suffix', width: 100 },
+        { title: '備考', dataIndex: 'price_suffix', width: 100 },
         {
             title: '操作',
             key: 'action',
             width: 150,
             render: (_: any, record: any) => (
                 <Space>
-                    <Button type="text" icon={<EditOutlined />} onClick={() => showModal(record)}>编辑</Button>
-                    <Popconfirm title="确定删除吗？" onConfirm={() => handleDelete(record.id)}>
-                        <Button type="text" danger icon={<DeleteOutlined />}>删除</Button>
+                    <Button type="text" icon={<EditOutlined />} onClick={() => showModal(record)}>編集</Button>
+                    <Popconfirm title="削除してもよろしいですか？" onConfirm={() => handleDelete(record.id)} okText="はい" cancelText="いいえ">
+                        <Button type="text" danger icon={<DeleteOutlined />}>削除</Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -181,10 +179,10 @@ const PriceManager: React.FC = () => {
                 body: JSON.stringify(values)
             });
             if (!res.ok) throw new Error();
-            message.success('保存成功');
+            message.success('保存が完了しました');
             setIsModalOpen(false);
             loadPrices();
-        } catch (e) { message.error('保存失败'); } finally { setLoading(false); }
+        } catch (e) { message.error('保存に失敗しました'); } finally { setLoading(false); }
     };
 
     const handleDelete = async (id: number) => {
@@ -194,9 +192,9 @@ const PriceManager: React.FC = () => {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            message.success('删除成功');
+            message.success('削除しました');
             loadPrices();
-        } catch (e) { message.error('删除失败'); }
+        } catch (e) { message.error('削除に失敗しました'); }
     };
 
     const showModal = (record: any = null) => {
@@ -215,7 +213,6 @@ const PriceManager: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    // 转换所有 ID 为字符串供 dnd-kit 使用
     const rowIds = useMemo(() => dataSource.map(i => String(i.id)), [dataSource]);
 
     return (
@@ -228,7 +225,7 @@ const PriceManager: React.FC = () => {
                     <Select value={selectedRepairType} style={{ width: 200 }} onChange={v => setSelectedRepairType(v)}>
                         {repairTypes.map(r => <Option key={r.id} value={r.id}>{r.name}</Option>)}
                     </Select>
-                    <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal()}>追加价格</Button>
+                    <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal()}>料金を追加</Button>
                 </Space>
             </Card>
 
@@ -239,7 +236,7 @@ const PriceManager: React.FC = () => {
                         <Tag color="green">{repairTypes.find(r => r.id === selectedRepairType)?.name}</Tag>
                     </Space>
                     <span style={{ color: '#faad14', fontSize: '12px' }}>
-                        <SortDescendingOutlined /> 拖动左侧图标重新排序
+                        <SortDescendingOutlined /> 左のアイコンをドラッグして並べ替え
                     </span>
                 </div>
 
@@ -257,14 +254,22 @@ const PriceManager: React.FC = () => {
                 </DndContext>
             </div>
 
-            <Modal title={editingRecord ? "编辑" : "新增"} open={isModalOpen} onOk={handleOk} onCancel={() => setIsModalOpen(false)} confirmLoading={loading}>
+            <Modal
+                title={editingRecord ? "料金編集" : "新規料金追加"}
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={() => setIsModalOpen(false)}
+                confirmLoading={loading}
+                okText="保存"
+                cancelText="キャンセル"
+            >
                 <Form form={form} layout="vertical" style={{ marginTop: 20 }}>
                     <Form.Item name="category_id" hidden><Input /></Form.Item>
                     <Form.Item name="repair_type_id" hidden><Input /></Form.Item>
-                    <Form.Item name="model_name" label="机型名称" rules={[{ required: true }]}><Input /></Form.Item>
-                    <Form.Item name="sort_order" label="排序权重"><InputNumber style={{ width: '100%' }} /></Form.Item>
-                    <Form.Item name="price" label="价格" rules={[{ required: true }]}><InputNumber style={{ width: '100%' }} /></Form.Item>
-                    <Form.Item name="price_suffix" label="备注"><Input /></Form.Item>
+                    <Form.Item name="model_name" label="機種名" rules={[{ required: true, message: '機種名を入力してください' }]}><Input placeholder="例：iPhone 13" /></Form.Item>
+                    <Form.Item name="sort_order" label="表示順ウェイト"><InputNumber style={{ width: '100%' }} placeholder="数値が大きいほど上位に表示されます" /></Form.Item>
+                    <Form.Item name="price" label="料金" rules={[{ required: true, message: '料金を入力してください' }]}><InputNumber style={{ width: '100%' }} formatter={value => `¥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} /></Form.Item>
+                    <Form.Item name="price_suffix" label="備考"><Input placeholder="例：税込 / 期間特別価格" /></Form.Item>
                 </Form>
             </Modal>
         </div>
