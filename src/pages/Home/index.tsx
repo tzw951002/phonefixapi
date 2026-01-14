@@ -61,11 +61,11 @@ const Home: React.FC = () => {
                         selectedKeys={[selectedKey]}
                         onClick={({ key }) => setSelectedKey(key)}
                         items={[
-                            { key: 'news', icon: <NotificationOutlined />, label: '通知一覧管理' },
-                            { key: 'categories', icon: <AppstoreAddOutlined />, label: '机种分类设置' },
-                            { key: 'prices', icon: <DollarOutlined />, label: '维修价格编辑' },
+                            { key: 'news', icon: <NotificationOutlined />, label: 'お知らせ一覧' },
+                            { key: 'categories', icon: <AppstoreAddOutlined />, label: '修理機種一覧' },
+                            { key: 'prices', icon: <DollarOutlined />, label: '修理料金一覧' },
                             { key: 'faq', icon: <QuestionCircleOutlined />, label: 'よくあるご質問' }, // 2. 增加 FAQ 菜单
-                            { key: 'config', icon: <SettingOutlined />, label: '全站情报设置' }
+                            { key: 'config', icon: <SettingOutlined />, label: 'サイト内容編集' }
                         ]}
                     />
                 </Sider>
@@ -78,7 +78,7 @@ const Home: React.FC = () => {
                             onClick={() => setCollapsed(!collapsed)}
                             style={{ fontSize: '18px', width: 64, height: 64 }}
                         />
-                        <div style={{ fontWeight: '500', color: '#8B7E74' }}>SmartDevice 维修管理后台</div>
+                        <div style={{ fontWeight: '500', color: '#8B7E74' }}>マスドク管理システム</div>
                         <Button type="primary" ghost icon={<LogoutOutlined />} onClick={handleLogout}>ログアウト</Button>
                     </Header>
 

@@ -118,9 +118,9 @@ const NewsManager: React.FC = () => {
             width: 180,
             render: (_: any, record: NewsItem) => (
                 <Space size="middle">
-                    <Button type="text" icon={<EditOutlined />} onClick={() => showModal(record)}>编辑</Button>
+                    <Button type="text" icon={<EditOutlined />} onClick={() => showModal(record)}>修正</Button>
                     <Popconfirm title="本当に削除しますか？" onConfirm={() => handleDelete(record.id)} okText="はい" cancelText="いいえ">
-                        <Button type="text" danger icon={<DeleteOutlined />}>删除</Button>
+                        <Button type="text" danger icon={<DeleteOutlined />}>削除</Button>
                     </Popconfirm>
                 </Space>
             ),
@@ -130,14 +130,14 @@ const NewsManager: React.FC = () => {
     return (
         <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', border: '1px solid #EADDCA' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                <h2 style={{ margin: 0, color: '#5D4037', fontSize: '1.25rem' }}>📢 通知一覧管理</h2>
+                <h2 style={{ margin: 0, color: '#5D4037', fontSize: '1.25rem' }}>お知らせ一覧</h2>
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}
                     style={{ background: '#4A6741', borderColor: '#4A6741' }}
                     onClick={() => showModal(null)}
                 >
-                    新规追加
+                    新規
                 </Button>
             </div>
 
@@ -151,7 +151,7 @@ const NewsManager: React.FC = () => {
             />
 
             <Modal
-                title={editingRecord ? "通知を編集" : "通知を追加"}
+                title={editingRecord ? "お知らせ編集" : "お知らせ新規"}
                 open={isModalOpen}
                 onOk={handleOk}
                 confirmLoading={loading} // 按钮加载状态
